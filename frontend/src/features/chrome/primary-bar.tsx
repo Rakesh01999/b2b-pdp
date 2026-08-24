@@ -103,7 +103,7 @@ export function PrimaryBar({
           properties move. */}
       <div
         className={cx(
-          'mx-auto grid w-full max-w-[1320px] grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 px-4 sm:px-6',
+          'shell grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3',
           'md:grid-cols-[auto_minmax(0,1fr)_auto] md:gap-x-5',
           condensed ? 'gap-y-1.5 py-2' : 'gap-y-2 py-2.5 md:py-3',
         )}

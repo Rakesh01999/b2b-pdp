@@ -24,7 +24,7 @@ export function Header({ lang }: { lang: Locale }) {
           controls open downward, and a lower stacking context would paint them
           behind the header. */}
       <div className="zone-nav relative z-[60] hidden border-b border-line bg-surface text-ink-dim md:block">
-        <div className="mx-auto flex h-9 w-full max-w-[1320px] items-center justify-between gap-4 px-4 sm:px-6">
+        <div className="shell flex h-9 items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <DistrictSelect lang={lang} />
             <span aria-hidden className="h-3 w-px bg-line" />
@@ -60,7 +60,7 @@ export function Header({ lang }: { lang: Locale }) {
           than to the page; `z-40` keeps the open panel above the content below
           without competing with the pinned bar above it. */}
       <div className="zone-nav relative z-40 border-b border-line bg-surface">
-        <div className="mx-auto flex h-11 w-full max-w-[1320px] items-center gap-1 px-4 sm:px-6">
+        <div className="shell flex h-11 items-center gap-1">
           <MegaMenu lang={lang} />
           <span aria-hidden className="h-4 w-px shrink-0 bg-line" />
 

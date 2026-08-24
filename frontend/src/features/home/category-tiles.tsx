@@ -36,7 +36,7 @@ export function CategoryTiles({ lang }: { lang: Lang }) {
         }
       />
 
-      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6">
         {CATEGORIES.map((category) => (
           <li key={category.slug}>
             <div className="group flex h-full flex-col rounded-xl border border-line bg-surface p-4 transition-colors hover:border-accent/45">

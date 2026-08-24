@@ -86,7 +86,7 @@ export function CategoryDirectory({ lang }: { lang: Lang }) {
           </Button>
         </div>
       ) : (
-        <ul className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <ul className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5">
           {results.map(({ category, matchedSubs }) => (
             <li key={category.slug}>
               <section

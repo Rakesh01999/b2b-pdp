@@ -163,7 +163,7 @@ export default async function CategoryPage({
         />
 
         {products.length > 0 ? (
-          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-7 3xl:grid-cols-8">
             {products.map((card) => (
               <li key={card.id}>
                 <ProductCardTile card={card} lang={lang} />

@@ -158,18 +158,25 @@ export default async function ProductPage({
           }
         />
 
-        {/* Hero.
-            Below md: one column, natural order.
-            md:       media | summary on row 1, the panel full width on row 2 —
-                      at 768px a genuine two-column hero leaves the mix grid
-                      under 300px wide, which is unusable.
-            lg:       media spans both rows in its own column; summary and panel
-                      stack beside it. */}
+        {/* Hero, restated at each breakpoint rather than left to reflow.
+
+            base  one column, natural order.
+            md    media | summary on row 1, panel full width on row 2 — at 768px
+                  a genuine two-column hero leaves the mix grid under 300px
+                  wide, which is unusable.
+            lg    media spans both rows in its own column; summary and panel
+                  stack beside it.
+            2xl   three columns: media | summary | panel. This is what the extra
+                  width on a large monitor is for. Stretching a two-column hero
+                  to 2400px would give the trade panel a 1400px-wide mix grid and
+                  landed-cost rows with a hand-span between label and figure —
+                  wider, and worse. A third column instead keeps every control at
+                  its comfortable width and puts the gained space to work. */}
         <div
           id="product-main"
-          className="grid gap-x-6 gap-y-5 md:grid-cols-2 lg:grid-cols-[minmax(0,430px)_minmax(0,1fr)] xl:grid-cols-[minmax(0,460px)_minmax(0,1fr)]"
+          className="grid gap-x-6 gap-y-5 md:grid-cols-2 lg:grid-cols-[minmax(0,430px)_minmax(0,1fr)] xl:grid-cols-[minmax(0,480px)_minmax(0,1fr)] 2xl:grid-cols-[minmax(0,520px)_minmax(0,1fr)_minmax(0,620px)] 2xl:gap-x-8"
         >
-          <div className="md:col-start-1 md:row-start-1 lg:row-span-2">
+          <div className="md:col-start-1 md:row-start-1 lg:row-span-2 2xl:row-span-1">
             <ProductGallery media={product.media} lang={lang} title={pick(product.title, lang)} />
           </div>
 
@@ -177,7 +184,7 @@ export default async function ProductPage({
             <ProductSummary product={product} lang={lang} />
           </div>
 
-          <div className="md:col-span-2 md:row-start-2 lg:col-span-1 lg:col-start-2">
+          <div className="md:col-span-2 md:row-start-2 lg:col-span-1 lg:col-start-2 2xl:col-start-3 2xl:row-start-1">
             <TradePanel lang={lang} />
           </div>
         </div>

@@ -80,7 +80,7 @@ export function StickyTradeBar({ lang, anchorId = 'trade-anchor' }: { lang: Lang
         visible ? 'translate-y-0' : 'translate-y-[calc(100%+3.5rem)] md:-translate-y-[130%]',
       )}
     >
-      <div className="mx-auto flex w-full max-w-[1320px] items-center gap-3 px-4 py-2.5 sm:px-6">
+      <div className="shell flex items-center gap-3 py-2.5">
         {/* Identity, desktop only: on a phone the product is unambiguous
             because its images are two swipes away, and the width is better
             spent on the CTA. */}

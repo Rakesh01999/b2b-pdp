@@ -128,6 +128,10 @@
   --glass: rgba(15, 25, 23, 0.85);
 }
 
+@theme {
+  --breakpoint-3xl: 120rem;
+}
+
 @theme inline {
   --color-bg: var(--bg);
   --color-surface: var(--surface);
@@ -278,6 +282,39 @@ body {
   max-width: 65ch;
 }
 
+
+/* ---------------------------------------------------------------------------
+   Page shell
+
+   Full-bleed with growing gutters and no max-width: on a large monitor the
+   catalogue should use the screen it was given, not sit in a 1320px box with
+   empty margins either side. Readability is protected where it actually
+   matters — prose keeps its own measure via , and the trade panel and
+   gallery cap themselves in the product grid — so the shell can stay fluid
+   without letting a paragraph run to 200 characters.
+   ------------------------------------------------------------------------- */
+
+.shell {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+
+@media (min-width: 640px) {
+  .shell { padding-inline: 1.5rem; }
+}
+
+@media (min-width: 1024px) {
+  .shell { padding-inline: 2rem; }
+}
+
+@media (min-width: 1536px) {
+  .shell { padding-inline: 3rem; }
+}
+
+@media (min-width: 1920px) {
+  .shell { padding-inline: 4rem; }
+}
 /* ---------------------------------------------------------------------------
    Surfaces
    ------------------------------------------------------------------------- */

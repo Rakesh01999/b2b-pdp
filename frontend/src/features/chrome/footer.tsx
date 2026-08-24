@@ -85,7 +85,7 @@ export function Footer({ lang }: { lang: Locale }) {
   return (
     <footer className="mt-10 border-t border-line bg-surface">
       <div className="border-b border-line">
-        <div className="mx-auto grid w-full max-w-[1320px] grid-cols-2 gap-5 px-4 py-7 sm:px-6 lg:grid-cols-4">
+        <div className="shell grid grid-cols-2 gap-5 py-7 lg:grid-cols-4 2xl:grid-cols-4">
           {SERVICE_STRIP.map((item) => (
             <div key={item.title.en} className="flex items-start gap-3">
               <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-accent-soft text-accent-ink">
@@ -100,7 +100,7 @@ export function Footer({ lang }: { lang: Locale }) {
         </div>
       </div>
 
-      <div className="mx-auto grid w-full max-w-[1320px] grid-cols-2 gap-x-6 gap-y-8 px-4 py-10 sm:px-6 md:grid-cols-3 lg:grid-cols-6">
+      <div className="shell grid grid-cols-2 gap-x-6 gap-y-8 py-10 md:grid-cols-3 lg:grid-cols-6">
         <div className="col-span-2">
           <Logo lang={lang} />
           <p className="mt-3.5 max-w-[34ch] text-[13.5px] leading-relaxed text-ink-dim">
@@ -173,7 +173,7 @@ export function Footer({ lang }: { lang: Locale }) {
       </div>
 
       <div className="border-t border-line">
-        <div className="mx-auto flex w-full max-w-[1320px] flex-wrap items-center justify-between gap-x-5 gap-y-3 px-4 py-4 text-[12px] text-ink-faint sm:px-6">
+        <div className="shell flex flex-wrap items-center justify-between gap-x-5 gap-y-3 py-4 text-[12px] text-ink-faint">
           <span>
             © 2026 ArcB2B · {t(lang, 'footer.rights')} · {t(lang, 'footer.tradeLicence')} TRAD/DNCC/041882/2023
           </span>

@@ -146,9 +146,9 @@ export function ProductRail({
   cols?: 4 | 5 | 6;
 }) {
   const gridCols = {
-    4: 'md:grid-cols-3 lg:grid-cols-4',
-    5: 'md:grid-cols-3 lg:grid-cols-5',
-    6: 'md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6',
+    4: 'md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6',
+    5: 'md:grid-cols-3 lg:grid-cols-5 2xl:grid-cols-6 3xl:grid-cols-7',
+    6: 'md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 3xl:grid-cols-8',
   }[cols];
 
   return (

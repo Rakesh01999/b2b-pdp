@@ -167,15 +167,16 @@ export function ProductSpecifications({ product, lang }: { product: Product; lan
   return (
     <ProductSection id="specifications" title={t(lang, 'section.specifications')}>
       <div className="zone-reference rounded-xl border border-line bg-surface">
-        <div className="grid md:grid-cols-2">
-          {grouped.map((entry, index) => (
+        {/* Cell separators are outlines, not borders. An `nth-child(even)` border
+            rule only produces the right hairlines at one specific column count,
+            and this grid is two columns at `md` and three at `2xl`. Outlines
+            overlap on shared edges, cost no layout, and are clipped to the card
+            by `overflow-hidden` — so the same rule is correct at any count. */}
+        <div className="grid overflow-hidden rounded-xl md:grid-cols-2 2xl:grid-cols-3">
+          {grouped.map((entry) => (
             <div
               key={entry.group}
-              className={
-                // Hairlines between groups without a border on the outer edges.
-                'border-line md:[&:nth-child(even)]:border-l ' +
-                (index < grouped.length - 1 ? 'border-b ' : '')
-              }
+              className="outline outline-1 -outline-offset-[0.5px] outline-line"
             >
               <SpecGroupBlock
                 label={t(lang, GROUP_LABEL[entry.group])}

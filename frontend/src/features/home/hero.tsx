@@ -1,6 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight, CreditCard, FileText, LayoutGrid, ShieldCheck, Truck } from 'lucide-react';
-import { HeroSearch } from './hero-search';
+import { ArrowRight, CreditCard, FileText, LayoutGrid, Search, ShieldCheck, Truck } from 'lucide-react';
 import { Container } from '@/components/ui/primitives';
 import {
   TOTAL_CATEGORY_COUNT,
@@ -18,17 +17,20 @@ import type { Bilingual, Lang } from '@/lib/types';
  * A B2B marketplace hero has one job that a consumer hero does not: it has to
  * get a buyer who arrived with a specific part number into the catalogue in one
  * action, while also telling a first-time importer what the platform actually
- * does for them. So the left column is search-first with the value proposition
- * above it, and the right column answers the case search cannot serve — "it is
- * not listed" — with the sourcing request that is this platform's real product.
+ * does for them. The search field itself lives once, in the pinned header bar
+ * above — it is on screen before the hero even renders, so repeating the same
+ * input here would not be a second way in, it would be the same control drawn
+ * twice on one page. The left column instead pairs the value proposition with a
+ * direct jump to the day's most-searched terms; the right column answers the
+ * case search cannot serve — "it is not listed" — with the sourcing request
+ * that is this platform's real product.
  *
  * No carousel. A rotating banner in a hero is a decision the buyer did not ask
  * to make, it moves the thing they were reading, and on a metered connection it
- * is several images downloaded to show one. The space goes to the search field
- * and to three figures that are true.
+ * is several images downloaded to show one. The space goes to the popular-terms
+ * shortcut and to three figures that are true.
  *
- * Server-rendered apart from the search field itself, so the headline and the
- * trust row cost no JavaScript.
+ * Fully server-rendered — nothing in this section costs client JavaScript.
  */
 
 const ASSURANCES: Array<{ icon: React.ReactNode; label: Bilingual }> = [
@@ -87,21 +89,27 @@ export function Hero({ lang }: { lang: Lang }) {
 
             <p className="zone-evidence mt-3.5 max-w-[58ch] text-ink-dim">{t(lang, 'home.sub')}</p>
 
+            {/* A jump row, not a second search box. The input already sits
+                pinned in the header above this section on first paint, so
+                repeating it here would be one control rendered twice rather
+                than a second way to start — this instead shortcuts straight to
+                a result page for what buyers are already searching. */}
             <div className="mt-6 max-w-[40rem]">
-              <HeroSearch lang={lang} />
-            </div>
-
-            <div className="mt-3.5 flex flex-wrap items-baseline gap-x-3 gap-y-1.5 text-[12.5px]">
-              <span className="font-semibold text-ink-dim">{t(lang, 'home.popular')}:</span>
-              {TRENDING_TERMS.map((item) => (
-                <Link
-                  key={item.term.en}
-                  href={localeHref(lang, item.href)}
-                  className="rounded-full border border-line bg-surface px-2.5 py-1 text-ink-dim transition-colors hover:border-accent hover:text-accent-ink"
-                >
-                  {pick(item.term, lang)}
-                </Link>
-              ))}
+              <p className="mb-2 flex items-center gap-1.5 text-[11.5px] font-bold uppercase tracking-[0.07em] text-ink-faint">
+                <Search size={13} aria-hidden />
+                {t(lang, 'home.popular')}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {TRENDING_TERMS.map((item) => (
+                  <Link
+                    key={item.term.en}
+                    href={localeHref(lang, item.href)}
+                    className="rounded-full border border-line bg-surface px-3.5 py-1.5 text-[13px] font-medium text-ink-dim transition-colors hover:border-accent hover:bg-accent-soft hover:text-accent-ink"
+                  >
+                    {pick(item.term, lang)}
+                  </Link>
+                ))}
+              </div>
             </div>
 
             <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 border-t border-line pt-5 text-[12.5px] font-medium text-ink-dim">

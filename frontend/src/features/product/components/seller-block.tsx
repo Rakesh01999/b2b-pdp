@@ -184,11 +184,7 @@ export function SellerBlock({
               {t(lang, 'seller.metricsTitle')}
             </p>
 
-            <dl className="grid grid-cols-2 gap-2.5">
-              {seller.metrics.map((metric) => (
-                <MetricTile key={metric.key} metric={metric} lang={lang} />
-              ))}
-            </dl>
+            <SellerMetricsGrid metrics={seller.metrics} lang={lang} />
 
             {seller.certifications.length > 0 && (
               <div className="mt-4 border-t border-line pt-3.5">
@@ -220,6 +216,28 @@ export function SellerBlock({
         )}
       </div>
     </section>
+  );
+}
+
+/**
+ * The trust ledger on its own, so the storefront page renders the identical
+ * four tiles rather than a second implementation that drifts from this one.
+ */
+export function SellerMetricsGrid({
+  metrics,
+  lang,
+  className = 'grid grid-cols-2 gap-2.5',
+}: {
+  metrics: SellerMetric[];
+  lang: Lang;
+  className?: string;
+}) {
+  return (
+    <dl className={className}>
+      {metrics.map((metric) => (
+        <MetricTile key={metric.key} metric={metric} lang={lang} />
+      ))}
+    </dl>
   );
 }
 

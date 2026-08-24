@@ -1,6 +1,13 @@
-import { ALL_CARDS, BOUGHT_TOGETHER, PRODUCTS } from '@/data/catalog';
+import {
+  ALL_CARDS,
+  ARCB2B_SOURCING,
+  BOUGHT_TOGETHER,
+  MEGHNA_TEXTILES,
+  PRODUCTS,
+  RIDDHI_IMPORTS,
+} from '@/data/catalog';
 import { featuredCategories } from '@/data/categories';
-import type { Product, ProductCard } from './types';
+import type { Product, ProductCard, Seller } from './types';
 
 /**
  * Server-only data access. Every read the product page needs goes through here,
@@ -124,3 +131,67 @@ export const TRENDING_TERMS = [
   { term: { en: 'LED panel', bn: 'এলইডি প্যানেল' }, href: '/search?q=led' },
   { term: { en: 'Power bank', bn: 'পাওয়ার ব্যাংক' }, href: '/search?q=power+bank' },
 ];
+
+/* ------------------------------------------------------------------- sellers */
+
+const SELLERS: Seller[] = [ARCB2B_SOURCING, MEGHNA_TEXTILES, RIDDHI_IMPORTS];
+
+/** Storefront slug is the tail of `storeHref`, so the two can never disagree. */
+function storeSlug(seller: Seller): string {
+  return seller.storeHref.replace(/^\/store\//, '');
+}
+
+export async function getSeller(slug: string): Promise<Seller | null> {
+  return SELLERS.find((seller) => storeSlug(seller) === slug) ?? null;
+}
+
+export function allSellerSlugs(): string[] {
+  return SELLERS.map(storeSlug);
+}
+
+/**
+ * A storefront's listings.
+ *
+ * Matched on seller name because that is the only join the card index carries.
+ * Against the real API this is `GET /v1/sellers/:id/listings` and the name
+ * comparison goes away.
+ */
+export async function getSellerCards(seller: Seller): Promise<ProductCard[]> {
+  return ALL_CARDS.filter((card) => card.sellerName === seller.name);
+}
+
+/* --------------------------------------------------------------------- deals */
+
+export interface Deal {
+  card: ProductCard;
+  /** Percentage off the MOQ price at the top of the ladder, 0–100. */
+  spreadPercent: number;
+  /** Quantity at which the best price applies. */
+  bestAtQty: number;
+}
+
+/**
+ * Deals, derived rather than curated.
+ *
+ * A wholesale "deal" is not a countdown timer on a staple that restocks weekly —
+ * it is the ladder that rewards volume hardest. So this ranks by the real spread
+ * between the MOQ price and the floor price, which is a claim the listing itself
+ * can be checked against.
+ */
+export async function getDeals(limit = 12): Promise<Deal[]> {
+  return ALL_CARDS.flatMap((card) => {
+    if (card.tiers.length < 2) return [];
+    const entry = card.tiers[0].unitPrice;
+    const best = card.tiers[card.tiers.length - 1];
+    if (entry <= 0 || best.unitPrice >= entry) return [];
+    return [
+      {
+        card,
+        spreadPercent: Math.round(((entry - best.unitPrice) / entry) * 100),
+        bestAtQty: best.minQty,
+      },
+    ];
+  })
+    .sort((a, b) => b.spreadPercent - a.spreadPercent || b.card.ordersPlaced - a.card.ordersPlaced)
+    .slice(0, limit);
+}

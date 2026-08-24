@@ -28,7 +28,7 @@ export function HeroSearch({ lang }: { lang: Lang }) {
     const params = new URLSearchParams();
     const trimmed = query.trim();
     if (trimmed) params.set('q', trimmed);
-    if (scope) params.set('category', scope);
+    if (scope) params.set('cat', scope);
     const qs = params.toString();
     router.push(localeHref(lang, qs ? `/search?${qs}` : '/search'));
   }
@@ -37,6 +37,8 @@ export function HeroSearch({ lang }: { lang: Lang }) {
     <form
       onSubmit={onSubmit}
       role="search"
+      action={localeHref(lang, '/search')}
+      method="get"
       className="flex h-12 items-stretch overflow-hidden rounded-xl border-2 border-accent bg-surface shadow-sm sm:h-14"
     >
       <div className="relative hidden shrink-0 items-stretch sm:flex">
@@ -45,6 +47,7 @@ export function HeroSearch({ lang }: { lang: Lang }) {
         </label>
         <select
           id="hero-scope"
+          name="cat"
           value={scope}
           onChange={(event) => setScope(event.target.value)}
           className="w-full max-w-[11rem] cursor-pointer appearance-none truncate bg-transparent pl-4 pr-9 text-[13.5px] font-semibold text-ink-dim outline-none focus-visible:bg-accent-soft"
@@ -66,6 +69,7 @@ export function HeroSearch({ lang }: { lang: Lang }) {
       <span aria-hidden className="my-2.5 hidden w-px shrink-0 bg-line sm:block" />
 
       <input
+        name="q"
         value={query}
         onChange={(event) => setQuery(event.target.value)}
         placeholder={t(lang, 'chrome.searchPlaceholder')}

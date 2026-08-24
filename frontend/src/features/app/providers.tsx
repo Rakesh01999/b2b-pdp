@@ -102,6 +102,9 @@ interface CartValue {
   unitCount: number;
   lineCount: number;
   addEntry: (entry: Omit<CartEntry, 'addedAt'>) => Promise<void>;
+  /** Removes one cart line by position. */
+  removeEntry: (index: number) => void;
+  clearCart: () => void;
   savedSlugs: string[];
   toggleSaved: (slug: string) => void;
   isSaved: (slug: string) => boolean;
@@ -167,6 +170,19 @@ export function AppProviders({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const removeEntry = useCallback((index: number) => {
+    setEntries((prev) => {
+      const next = prev.filter((_, i) => i !== index);
+      writeJson(KEYS.cart, next);
+      return next;
+    });
+  }, []);
+
+  const clearCart = useCallback(() => {
+    setEntries([]);
+    writeJson(KEYS.cart, []);
+  }, []);
+
   // Saving works before sign-in and merges on sign-in. Baymard finds 89% of
   // sites force registration first, and 21% of users rely on saving to compare.
   const toggleSaved = useCallback((slug: string) => {
@@ -201,6 +217,8 @@ export function AppProviders({ children }: { children: ReactNode }) {
       unitCount,
       lineCount: entries.length,
       addEntry,
+      removeEntry,
+      clearCart,
       savedSlugs,
       toggleSaved,
       isSaved: (slug: string) => savedSlugs.includes(slug),
@@ -208,7 +226,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
       noteVisit,
       hydrated,
     };
-  }, [entries, addEntry, savedSlugs, toggleSaved, recentSlugs, noteVisit, hydrated]);
+  }, [entries, addEntry, removeEntry, clearCart, savedSlugs, toggleSaved, recentSlugs, noteVisit, hydrated]);
 
   return (
     <PrefsContext.Provider value={prefsValue}>

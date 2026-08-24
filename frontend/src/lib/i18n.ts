@@ -48,7 +48,7 @@ const STRINGS = {
   'chrome.search': { en: 'Search', bn: 'খুঁজুন' },
   'chrome.trending': { en: 'Trending', bn: 'ট্রেন্ডিং' },
   'chrome.allCategories': { en: 'All Categories', bn: 'সব ক্যাটাগরি' },
-  'chrome.flashDeals': { en: 'Flash Deals', bn: 'ফ্ল্যাশ ডিল' },
+  'chrome.flashDeals': { en: 'Volume Deals', bn: 'ভলিউম ডিল' },
   'chrome.requestQuote': { en: 'Request a Quote', bn: 'কোটেশন অনুরোধ' },
   'chrome.messages': { en: 'Messages', bn: 'বার্তা' },
   'chrome.notifications': { en: 'Notifications', bn: 'নোটিফিকেশন' },
@@ -465,6 +465,223 @@ const STRINGS = {
   'misc.close': { en: 'Close', bn: 'বন্ধ' },
   'misc.of': { en: 'of', bn: 'এর' },
   'misc.and': { en: 'and', bn: 'এবং' },
+  'misc.backHome': { en: 'Back to home', bn: 'হোমে ফিরুন' },
+  'misc.viewAll': { en: 'View all', bn: 'সব দেখুন' },
+  'misc.total': { en: 'Total', bn: 'মোট' },
+  'misc.units': { en: 'units', bn: 'ইউনিট' },
+  'misc.prototypeLabel': { en: 'Prototype', bn: 'প্রোটোটাইপ' },
+
+  /* ------------------------------------------------------------------ search */
+  'search.title': { en: 'Search', bn: 'খুঁজুন' },
+  'search.resultsFor': { en: 'Results for', bn: 'ফলাফল' },
+  'search.allListings': { en: 'All listings', bn: 'সব লিস্টিং' },
+  'search.listingsFound': { en: 'listings', bn: 'লিস্টিং' },
+  'search.listingFound': { en: 'listing', bn: 'লিস্টিং' },
+  'search.sort': { en: 'Sort', bn: 'সাজান' },
+  'search.sortRelevance': { en: 'Best match', bn: 'সবচেয়ে মিল' },
+  'search.sortPriceAsc': { en: 'Price: low to high', bn: 'দাম: কম থেকে বেশি' },
+  'search.sortPriceDesc': { en: 'Price: high to low', bn: 'দাম: বেশি থেকে কম' },
+  'search.sortMoq': { en: 'Lowest minimum', bn: 'সর্বনিম্ন MOQ' },
+  'search.sortPopular': { en: 'Most ordered', bn: 'সর্বাধিক অর্ডার' },
+  'search.filters': { en: 'Filters', bn: 'ফিল্টার' },
+  'search.category': { en: 'Category', bn: 'ক্যাটাগরি' },
+  'search.inStockOnly': { en: 'Local stock only', bn: 'শুধু স্থানীয় স্টক' },
+  'search.lowMoqOnly': { en: 'Minimum 100 or under', bn: 'সর্বনিম্ন ১০০ বা কম' },
+  'search.clearFilters': { en: 'Clear filters', bn: 'ফিল্টার মুছুন' },
+  'search.emptyTitle': { en: 'Nothing in the sample catalogue matches that', bn: 'নমুনা ক্যাটালগে এর সঙ্গে কিছু মেলেনি' },
+  'search.emptyBody': {
+    en: 'The sample catalogue covers ten listings across a few branches of the tree. Post a sourcing request and verified suppliers will quote against it, or open one of the shelves below.',
+    bn: 'নমুনা ক্যাটালগে গাছের কয়েকটি শাখায় দশটি লিস্টিং আছে। একটি সোর্সিং অনুরোধ দিন — যাচাইকৃত সরবরাহকারীরা কোট দেবেন, অথবা নিচের শেলফগুলো দেখুন।',
+  },
+  'search.suggestedShelves': { en: 'Shelves matching your words', bn: 'আপনার শব্দের সঙ্গে মেলা শেলফ' },
+  'search.noQueryTitle': { en: 'Search the wholesale catalogue', bn: 'পাইকারি ক্যাটালগ খুঁজুন' },
+  'search.noQueryBody': {
+    en: 'Type what you are sourcing. Every result shows its minimum order and the price at each quantity tier, so you can compare before you ask anyone anything.',
+    bn: 'আপনি যা সোর্স করছেন লিখুন। প্রতিটি ফলাফলে সর্বনিম্ন অর্ডার ও প্রতিটি টিয়ারের দাম দেখা যায় — কাউকে কিছু জিজ্ঞেস করার আগেই তুলনা করতে পারবেন।',
+  },
+  'search.narrowedTo': { en: 'Narrowed to', bn: 'সীমিত' },
+
+  /* -------------------------------------------------------------------- cart */
+  'cart.title': { en: 'Your cart', bn: 'আপনার কার্ট' },
+  'cart.emptyTitle': { en: 'Your cart is empty', bn: 'আপনার কার্ট খালি' },
+  'cart.emptyBody': {
+    en: 'Build a mix on any product page and it lands here. The cart is stored in this browser, so it survives a reload but does not follow you to another device until you sign in.',
+    bn: 'যেকোনও পণ্যের পেজে মিক্স তৈরি করলে তা এখানে আসে। কার্ট এই ব্রাউজারে সংরক্ষিত — রিলোডে থাকে, তবে সাইন ইন না করলে অন্য ডিভাইসে যায় না।',
+  },
+  'cart.lines': { en: 'lines', bn: 'লাইন' },
+  'cart.remove': { en: 'Remove', bn: 'সরান' },
+  'cart.removeLine': { en: 'Remove this line', bn: 'এই লাইন সরান' },
+  'cart.clear': { en: 'Clear cart', bn: 'কার্ট খালি করুন' },
+  'cart.summary': { en: 'Order summary', bn: 'অর্ডার সারসংক্ষেপ' },
+  'cart.goods': { en: 'Goods total', bn: 'পণ্যের মোট' },
+  'cart.checkout': { en: 'Proceed to checkout', bn: 'চেকআউটে যান' },
+  'cart.checkoutNote': {
+    en: 'Checkout needs the payment gateway and the order service, neither of which is part of this front-end prototype.',
+    bn: 'চেকআউটের জন্য পেমেন্ট গেটওয়ে ও অর্ডার সার্ভিস দরকার, যা এই ফ্রন্ট-এন্ড প্রোটোটাইপে নেই।',
+  },
+  'cart.keepBrowsing': { en: 'Keep browsing', bn: 'ব্রাউজিং চালিয়ে যান' },
+  'cart.added': { en: 'Added', bn: 'যোগ হয়েছে' },
+  'cart.viewListing': { en: 'View listing', bn: 'লিস্টিং দেখুন' },
+  'cart.editMix': { en: 'Edit mix', bn: 'মিক্স সম্পাদনা' },
+  'cart.landedNote': {
+    en: 'Courier and payment fee are quoted per consignment at checkout, against the district in your preferences.',
+    bn: 'কুরিয়ার ও পেমেন্ট ফি চেকআউটে কনসাইনমেন্ট অনুযায়ী, আপনার পছন্দের জেলার বিপরীতে নির্ধারিত হয়।',
+  },
+
+  /* ------------------------------------------------------------------- deals */
+  'deals.title': { en: 'Volume deals', bn: 'ভলিউম ডিল' },
+  'deals.sub': {
+    en: 'Ranked by how hard the ladder rewards volume — the real spread between the minimum-order price and the floor price.',
+    bn: 'ল্যাডার ভলিউমে কত ছাড় দেয় তার ভিত্তিতে সাজানো — সর্বনিম্ন অর্ডারের দাম ও সর্বনিম্ন দামের প্রকৃত পার্থক্য।',
+  },
+  'deals.spreadOff': { en: 'off at volume', bn: 'ভলিউমে ছাড়' },
+  'deals.entryPrice': { en: 'At the minimum', bn: 'সর্বনিম্ন অর্ডারে' },
+  'deals.bestPrice': { en: 'Best price', bn: 'সেরা দাম' },
+  'deals.bestFrom': { en: 'from', bn: 'থেকে' },
+  'deals.method': {
+    en: 'No countdown timers. A staple that restocks every week is not a flash sale, and a timer on one is a lie with a clock attached.',
+    bn: 'কোনও কাউন্টডাউন টাইমার নেই। প্রতি সপ্তাহে স্টকে আসা নিত্যপণ্য ফ্ল্যাশ সেল নয়, আর তাতে টাইমার লাগানো ঘড়িসহ একটি মিথ্যা।',
+  },
+  'deals.empty': { en: 'No laddered listings in the sample catalogue yet.', bn: 'নমুনা ক্যাটালগে এখনও ল্যাডার-যুক্ত লিস্টিং নেই।' },
+
+  /* --------------------------------------------------------------- rfq page */
+  'rfqPage.sub': {
+    en: 'Describe what you need and verified suppliers quote against it. You compare the replies side by side before committing to anything.',
+    bn: 'আপনার প্রয়োজন লিখুন, যাচাইকৃত সরবরাহকারীরা কোট দেবেন। কিছু চূড়ান্ত করার আগে পাশাপাশি উত্তর তুলনা করবেন।',
+  },
+  'rfqPage.productLabel': { en: 'Product or category', bn: 'পণ্য বা ক্যাটাগরি' },
+  'rfqPage.productPlaceholder': { en: 'e.g. TWS earbuds, retail-boxed', bn: 'যেমন TWS ইয়ারবাড, রিটেইল বক্সে' },
+  'rfqPage.contact': { en: 'How suppliers reach you', bn: 'সরবরাহকারীরা কীভাবে যোগাযোগ করবেন' },
+  'rfqPage.business': { en: 'Business name', bn: 'ব্যবসার নাম' },
+  'rfqPage.phone': { en: 'Mobile number', bn: 'মোবাইল নম্বর' },
+  'rfqPage.whatHappens': { en: 'What happens next', bn: 'এরপর কী হয়' },
+  'rfqPage.step1': { en: 'Your request reaches suppliers in the matching category — never published publicly.', bn: 'আপনার অনুরোধ সংশ্লিষ্ট ক্যাটাগরির সরবরাহকারীদের কাছে যায় — কখনও প্রকাশ্যে নয়।' },
+  'rfqPage.step2': { en: 'Quotes arrive in one thread, each with a price, a lead time and a validity period.', bn: 'কোট একটি থ্রেডে আসে, প্রতিটিতে দাম, লিড টাইম ও মেয়াদ থাকে।' },
+  'rfqPage.step3': { en: 'You accept one, and payment goes into escrow rather than to the supplier.', bn: 'আপনি একটি গ্রহণ করেন, এবং পেমেন্ট সরবরাহকারীর বদলে এসক্রোতে যায়।' },
+  'rfqPage.aboutBulk': { en: 'How bulk ordering works', bn: 'বাল্ক অর্ডার কীভাবে কাজ করে' },
+  'rfqPage.invalid': { en: 'Fill in the product, quantity and a mobile number.', bn: 'পণ্য, পরিমাণ ও মোবাইল নম্বর দিন।' },
+
+  /* ------------------------------------------------------------------- store */
+  'store.metricsFootnote': {
+    en: 'All four figures are computed from transactions on this platform. None can be edited by the supplier, and none publishes until the sample is large enough for the number to mean something.',
+    bn: 'চারটি সংখ্যাই এই প্ল্যাটফর্মের লেনদেন থেকে হিসাব হয়। সরবরাহকারী কোনওটি সম্পাদনা করতে পারেন না, এবং নমুনা যথেষ্ট বড় না হলে কোনওটি প্রকাশও হয় না।',
+  },
+  'store.verificationLink': { en: 'How suppliers are verified', bn: 'সরবরাহকারী কীভাবে যাচাই হয়' },
+  'store.listings': { en: 'Listings from this supplier', bn: 'এই সরবরাহকারীর লিস্টিং' },
+  'store.performance': { en: 'Measured performance', bn: 'পরিমাপকৃত পারফরম্যান্স' },
+  'store.noListings': {
+    en: 'No listings from this storefront are in the sample catalogue. Message them with what you need and they will quote.',
+    bn: 'নমুনা ক্যাটালগে এই স্টোরফ্রন্টের কোনও লিস্টিং নেই। আপনার প্রয়োজন জানিয়ে বার্তা দিন, তারা কোট দেবেন।',
+  },
+  'store.tradingSince': { en: 'Trading since', bn: 'ব্যবসা শুরু' },
+  'store.skus': { en: 'SKUs listed', bn: 'তালিকাভুক্ত SKU' },
+  'store.platformStore': { en: 'ArcB2B first-party stock', bn: 'ArcB2B নিজস্ব স্টক' },
+  'store.supplierStore': { en: 'Independent supplier storefront', bn: 'স্বতন্ত্র সরবরাহকারী স্টোরফ্রন্ট' },
+
+  /* ----------------------------------------------------------------- account */
+  'account.title': { en: 'Your account', bn: 'আপনার অ্যাকাউন্ট' },
+  'account.signedOut': { en: 'Not signed in', bn: 'সাইন ইন করা নেই' },
+  'account.signedOutBody': {
+    en: 'Sign in to sync your cart, saved listings and quotation threads across devices. Everything below is held in this browser only.',
+    bn: 'কার্ট, সংরক্ষিত লিস্টিং ও কোটেশন থ্রেড সব ডিভাইসে রাখতে সাইন ইন করুন। নিচের সবকিছু কেবল এই ব্রাউজারে আছে।',
+  },
+  'account.savedListings': { en: 'Saved listings', bn: 'সংরক্ষিত লিস্টিং' },
+  'account.recentlyViewed': { en: 'Recently viewed', bn: 'সম্প্রতি দেখা' },
+  'account.inCart': { en: 'In your cart', bn: 'কার্টে' },
+  'account.noSaved': { en: 'Nothing saved yet. The heart on any listing puts it here.', bn: 'এখনও কিছু সংরক্ষিত নেই। যেকোনও লিস্টিংয়ের হার্ট চাপলে এখানে আসবে।' },
+  'account.noRecent': { en: 'No listings viewed in this browser yet.', bn: 'এই ব্রাউজারে এখনও কোনও লিস্টিং দেখা হয়নি।' },
+  'account.ordersTitle': { en: 'Your orders', bn: 'আপনার অর্ডার' },
+  'account.ordersEmpty': {
+    en: 'Order history comes from the order service, which is not part of this front-end prototype. The sample request below shows the shape a real one takes.',
+    bn: 'অর্ডার ইতিহাস আসে অর্ডার সার্ভিস থেকে, যা এই ফ্রন্ট-এন্ড প্রোটোটাইপে নেই। নিচের নমুনা অনুরোধে প্রকৃত রূপটি দেখা যায়।',
+  },
+  'account.quotations': { en: 'Quotation requests', bn: 'কোটেশন অনুরোধ' },
+  'account.viewRequest': { en: 'View request', bn: 'অনুরোধ দেখুন' },
+  'help.trackHint': {
+    en: 'Every order carries a courier tracking reference from the moment it is dispatched, and the same reference reaches your registered mobile number by SMS — so an order can be traced even from a phone that is not signed in.',
+    bn: 'প্রতিটি অর্ডার পাঠানোর মুহূর্ত থেকে একটি কুরিয়ার ট্র্যাকিং রেফারেন্স বহন করে, এবং একই রেফারেন্স এসএমএসে আপনার নিবন্ধিত মোবাইল নম্বরে যায় — তাই সাইন ইন না করা ফোন থেকেও অর্ডার খোঁজা যায়।',
+  },
+  'account.localData': { en: 'Held in this browser', bn: 'এই ব্রাউজারে সংরক্ষিত' },
+
+  /* ------------------------------------------------------------------- rfq id */
+  'rfqThread.title': { en: 'Quotation request', bn: 'কোটেশন অনুরোধ' },
+  'rfqThread.quotesReceived': { en: 'Quotes received', bn: 'প্রাপ্ত কোট' },
+  'rfqThread.quoteReceived': { en: 'Quote received', bn: 'প্রাপ্ত কোট' },
+  'rfqThread.validUntil': { en: 'Valid until', bn: 'মেয়াদ' },
+  'rfqThread.leadTime': { en: 'Lead time', bn: 'লিড টাইম' },
+  'rfqThread.accept': { en: 'Accept this quote', bn: 'এই কোট গ্রহণ করুন' },
+  'rfqThread.negotiate': { en: 'Counter-offer', bn: 'পাল্টা প্রস্তাব' },
+  'rfqThread.requested': { en: 'You requested', bn: 'আপনি চেয়েছেন' },
+  'rfqThread.awaiting': { en: 'Awaiting more quotes', bn: 'আরও কোটের অপেক্ষা' },
+  'rfqThread.notFound': { en: 'No such quotation request', bn: 'এমন কোনও কোটেশন অনুরোধ নেই' },
+  'rfqThread.landedPerUnit': { en: 'Landed per unit', bn: 'প্রতি ইউনিটে সর্বমোট' },
+  'rfqThread.bestOnPrice': { en: 'Lowest price', bn: 'সর্বনিম্ন দাম' },
+  'rfqThread.underTarget': { en: 'under your target', bn: 'আপনার লক্ষ্যের নিচে' },
+  'rfqThread.needsMore': { en: 'Only at this price if you take a further', bn: 'এই দামে নিতে আরও লাগবে' },
+  'rfqThread.compareNote': {
+    en: 'Each quote is ranked by its landed cost per unit at the quantity that quote is actually valid for — not by its headline price. A ৳25 saving that needs 300 more units is only a saving if those 300 sell.',
+    bn: 'প্রতিটি কোট তার নিজের প্রযোজ্য পরিমাণে প্রতি ইউনিটের সর্বমোট খরচ অনুযায়ী সাজানো — প্রচারিত দাম অনুযায়ী নয়। ২৫ টাকার সাশ্রয়ের জন্য আরও ৩০০ ইউনিট লাগলে, সেই ৩০০ বিক্রি হলেই তা সাশ্রয়।',
+  },
+  'rfqThread.bestOnSpeed': { en: 'Fastest', bn: 'দ্রুততম' },
+
+  /* ---------------------------------------------------------------- messages */
+  'messages.title': { en: 'Messages', bn: 'বার্তা' },
+  'messages.threads': { en: 'Conversations', bn: 'কথোপকথন' },
+  'messages.about': { en: 'About', bn: 'বিষয়' },
+  'messages.write': { en: 'Write a message', bn: 'বার্তা লিখুন' },
+  'messages.placeholder': { en: 'Quantity, delivery district, and anything you need customised…', bn: 'পরিমাণ, ডেলিভারি জেলা, এবং যা কাস্টমাইজ করতে চান…' },
+  'messages.send': { en: 'Send', bn: 'পাঠান' },
+  'messages.sent': { en: 'Message queued', bn: 'বার্তা কিউতে' },
+  'messages.sendNote': {
+    en: 'Delivery needs the messaging service; this prototype holds your draft in the browser instead of dropping it.',
+    bn: 'পাঠাতে মেসেজিং সার্ভিস দরকার; এই প্রোটোটাইপ আপনার ড্রাফট ফেলে না দিয়ে ব্রাউজারে রাখে।',
+  },
+  'messages.empty': { en: 'No conversations yet.', bn: 'এখনও কোনও কথোপকথন নেই।' },
+  'messages.newAbout': { en: 'New message about', bn: 'নতুন বার্তা — বিষয়' },
+  'messages.responseTypical': { en: 'Typically replies within', bn: 'সাধারণত উত্তর দেয়' },
+
+  /* ----------------------------------------------------------- notifications */
+  'notif.title': { en: 'Notifications', bn: 'নোটিফিকেশন' },
+  'notif.empty': { en: 'Nothing to catch up on.', bn: 'নতুন কিছু নেই।' },
+  'notif.unread': { en: 'unread', bn: 'অপঠিত' },
+  'notif.settingsNote': {
+    en: 'Order, quotation and dispute events push here and to your registered mobile number.',
+    bn: 'অর্ডার, কোটেশন ও ডিসপিউটের ঘটনা এখানে এবং আপনার নিবন্ধিত মোবাইল নম্বরে যায়।',
+  },
+
+  /* -------------------------------------------------------------------- auth */
+  'auth.signInTitle': { en: 'Sign in', bn: 'সাইন ইন' },
+  'auth.signInSub': { en: 'One code to your mobile number. No password to forget.', bn: 'আপনার মোবাইলে একটি কোড। মনে রাখার মতো কোনও পাসওয়ার্ড নেই।' },
+  'auth.registerTitle': { en: 'Create a buyer account', bn: 'ক্রেতা অ্যাকাউন্ট খুলুন' },
+  'auth.registerSub': { en: 'Free. You need a business name and a mobile number — trade licence only if you want to sell.', bn: 'ফ্রি। ব্যবসার নাম ও মোবাইল নম্বর দরকার — বিক্রি করতে চাইলে কেবল তখনই ট্রেড লাইসেন্স।' },
+  'auth.phone': { en: 'Mobile number', bn: 'মোবাইল নম্বর' },
+  'auth.phoneHint': { en: '11 digits, starting 01', bn: '১১ সংখ্যা, ০১ দিয়ে শুরু' },
+  'auth.business': { en: 'Business name', bn: 'ব্যবসার নাম' },
+  'auth.district': { en: 'Main delivery district', bn: 'প্রধান ডেলিভারি জেলা' },
+  'auth.continue': { en: 'Send me a code', bn: 'কোড পাঠান' },
+  'auth.createAccount': { en: 'Create account', bn: 'অ্যাকাউন্ট খুলুন' },
+  'auth.haveAccount': { en: 'Already have an account?', bn: 'অ্যাকাউন্ট আছে?' },
+  'auth.noAccount': { en: 'New to ArcB2B?', bn: 'ArcB2B-এ নতুন?' },
+  'auth.invalidPhone': { en: 'Enter an 11-digit Bangladeshi mobile number.', bn: '১১ সংখ্যার বাংলাদেশি মোবাইল নম্বর দিন।' },
+  'auth.invalidBusiness': { en: 'Enter the name your trade licence is in.', bn: 'ট্রেড লাইসেন্সে যে নাম আছে সেটি দিন।' },
+  'auth.stubNote': {
+    en: 'Authentication needs the identity service and an SMS gateway, neither of which is part of this front-end prototype. The form validates exactly as it would in production.',
+    bn: 'অথেনটিকেশনের জন্য আইডেন্টিটি সার্ভিস ও এসএমএস গেটওয়ে দরকার, যা এই ফ্রন্ট-এন্ড প্রোটোটাইপে নেই। ফর্মটি প্রোডাকশনের মতোই যাচাই করে।',
+  },
+  'auth.noPasswordNote': {
+    en: 'No password. We send a one-time code to your mobile number, the same way bKash and Nagad already do — one fewer credential to lose.',
+    bn: 'কোনও পাসওয়ার্ড নেই। আমরা আপনার মোবাইল নম্বরে একটি এককালীন কোড পাঠাই, বিকাশ ও নগদ যেভাবে করে — হারানোর মতো একটি জিনিস কম।',
+  },
+  'auth.sellerInstead': { en: 'Want to sell instead?', bn: 'বিক্রি করতে চান?' },
+
+  /* ---------------------------------------------------------------- content */
+  'content.updated': { en: 'Last updated', bn: 'সর্বশেষ হালনাগাদ' },
+  'content.related': { en: 'Read next', bn: 'পরবর্তী পড়ুন' },
+  'content.stillStuck': { en: 'Still stuck?', bn: 'এখনও সমাধান হয়নি?' },
+  'content.stillStuckBody': {
+    en: 'Message the seller from the product page — the SKU, your quantity and the ladder price travel with the conversation, so nobody has to ask what you are looking at.',
+    bn: 'পণ্যের পেজ থেকে বিক্রেতাকে বার্তা দিন — SKU, আপনার পরিমাণ ও ল্যাডার মূল্য কথোপকথনের সঙ্গে যায়, তাই আপনি কী দেখছেন তা কাউকে জিজ্ঞেস করতে হয় না।',
+  },
 } as const satisfies Record<string, Bilingual>;
 
 export type StringKey = keyof typeof STRINGS;
@@ -472,6 +689,18 @@ export type StringKey = keyof typeof STRINGS;
 /** Bound translator. Server components call `const t = translator(lang)`. */
 export function translator(lang: Lang): (key: StringKey) => string {
   return (key) => pick(STRINGS[key], lang);
+}
+
+/**
+ * Count-aware lookup.
+ *
+ * English inflects these nouns and Bengali does not, so both keys resolve to the
+ * same Bengali string while English gets the distinction. Without this the page
+ * says '1 listings', which is the kind of small wrongness that makes a buyer
+ * doubt the numbers next to it.
+ */
+export function tn(lang: Lang, count: number, one: StringKey, many: StringKey): string {
+  return t(lang, count === 1 ? one : many);
 }
 
 export function t(lang: Lang, key: StringKey): string {

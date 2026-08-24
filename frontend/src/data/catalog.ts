@@ -930,6 +930,7 @@ function toCard(p: Product): ProductCard {
     leadTimeDays: p.logistics.leadTimeDays,
     madeToOrder: p.logistics.sourcingDays !== undefined,
     sellerName: p.seller.name,
+    categorySlug: p.category.slug,
   };
 }
 
@@ -954,6 +955,7 @@ const EXTRA_CARDS: ProductCard[] = [
     leadTimeDays: 0,
     madeToOrder: false,
     sellerName: 'ArcB2B Sourcing',
+    categorySlug: 'cables-connectors',
   },
   {
     id: 'x-packaging',
@@ -973,6 +975,7 @@ const EXTRA_CARDS: ProductCard[] = [
     leadTimeDays: 2,
     madeToOrder: false,
     sellerName: 'Dhaka Pack House',
+    categorySlug: 'retail-packaging',
   },
   {
     id: 'x-powerbank',
@@ -993,6 +996,7 @@ const EXTRA_CARDS: ProductCard[] = [
     leadTimeDays: 4,
     madeToOrder: false,
     sellerName: 'ArcB2B Sourcing',
+    categorySlug: 'power-banks',
   },
   {
     id: 'x-smartwatch',
@@ -1013,6 +1017,7 @@ const EXTRA_CARDS: ProductCard[] = [
     leadTimeDays: 6,
     madeToOrder: false,
     sellerName: 'ArcB2B Sourcing',
+    categorySlug: 'smartwatches',
   },
   {
     id: 'x-tripod',
@@ -1032,6 +1037,7 @@ const EXTRA_CARDS: ProductCard[] = [
     leadTimeDays: 5,
     madeToOrder: false,
     sellerName: 'ArcB2B Sourcing',
+    categorySlug: 'selfie-tripods',
   },
 ];
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Bell, ChevronDown, MessageSquare, Search, ShoppingCart, User } from 'lucide-react';
@@ -62,23 +63,40 @@ export function PrimaryBar({
   lang,
   categories,
   trending,
+  messageCount,
+  notificationCount,
 }: {
   lang: Lang;
   categories: Array<{ name: Bilingual; slug: string }>;
   trending: Array<{ term: Bilingual; href: string }>;
+  /** Threads awaiting the buyer's reply. Counted by the server, not invented. */
+  messageCount: number;
+  notificationCount: number;
 }) {
   const router = useRouter();
   const condensed = useCondensed();
   const [query, setQuery] = useState('');
   const [scope, setScope] = useState('');
   const { unitCount, hydrated } = useCart();
+  const pathname = usePathname();
+
+  // Keeps the box showing what the results page is actually showing when a
+  // buyer lands on /search from a shared link or the back button — reading
+  // `window.location` directly rather than `useSearchParams`, which would
+  // force a Suspense boundary around every page that renders this header.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    /* eslint-disable-next-line react-hooks/set-state-in-effect */
+    setQuery(params.get('q') ?? '');
+    setScope(params.get('cat') ?? '');
+  }, [pathname]);
 
   function onSubmit(event: FormEvent) {
     event.preventDefault();
     const params = new URLSearchParams();
     const trimmed = query.trim();
     if (trimmed) params.set('q', trimmed);
-    if (scope) params.set('category', scope);
+    if (scope) params.set('cat', scope);
     const qs = params.toString();
     router.push(localeHref(lang, qs ? `/search?${qs}` : '/search'));
   }
@@ -125,6 +143,11 @@ export function PrimaryBar({
           <form
             onSubmit={onSubmit}
             role="search"
+            /* A real GET form as well as a handler: the search box keeps working
+               with JavaScript unavailable, which on a Bangladeshi 3G connection
+               is not a hypothetical. */
+            action={localeHref(lang, '/search')}
+            method="get"
             className={cx(
               'flex items-stretch overflow-hidden rounded-xl border-2 border-accent bg-surface transition-[height] duration-200 motion-reduce:transition-none',
               condensed ? 'h-11' : 'h-11 md:h-12',
@@ -141,6 +164,7 @@ export function PrimaryBar({
               </label>
               <select
                 id="search-scope"
+                name="cat"
                 value={scope}
                 onChange={(event) => setScope(event.target.value)}
                 className="w-full max-w-[9.5rem] cursor-pointer appearance-none truncate bg-transparent pl-4 pr-8 text-[13px] font-semibold text-ink-dim outline-none focus-visible:bg-accent-soft"
@@ -164,6 +188,7 @@ export function PrimaryBar({
             <span aria-hidden className="my-2 hidden w-px shrink-0 bg-line sm:block md:hidden lg:block" />
 
             <input
+              name="q"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder={t(lang, 'chrome.searchPlaceholder')}
@@ -210,13 +235,14 @@ export function PrimaryBar({
             href={localeHref(lang, '/messages')}
             label={t(lang, 'chrome.messages')}
             icon={<MessageSquare size={19} aria-hidden />}
-            badge={2}
+            badge={messageCount > 0 ? messageCount : undefined}
             hideOnMobile
           />
           <HeaderAction
             href={localeHref(lang, '/notifications')}
             label={t(lang, 'chrome.notifications')}
             icon={<Bell size={19} aria-hidden />}
+            badge={notificationCount > 0 ? notificationCount : undefined}
             hideOnMobile
           />
           <HeaderAction
@@ -233,8 +259,14 @@ export function PrimaryBar({
             icon={<User size={19} aria-hidden />}
           />
           <Link
+            href={localeHref(lang, '/sign-in')}
+            className="ml-2 hidden px-2 text-[13px] font-semibold text-ink-dim transition-colors hover:text-accent-ink lg:inline-block"
+          >
+            {t(lang, 'chrome.signIn')}
+          </Link>
+          <Link
             href={localeHref(lang, '/register')}
-            className="ml-2 hidden rounded-full bg-accent-soft px-4 py-2 text-[13px] font-semibold text-accent-ink transition-colors hover:bg-accent hover:text-on-fill lg:inline-block"
+            className="hidden rounded-full bg-accent-soft px-4 py-2 text-[13px] font-semibold text-accent-ink transition-colors hover:bg-accent hover:text-on-fill lg:inline-block"
           >
             {t(lang, 'chrome.joinFree')}
           </Link>

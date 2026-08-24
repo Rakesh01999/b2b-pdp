@@ -31,9 +31,24 @@ listing state.
 | `/[lang]/categories` | The full directory — 20 categories, 108 subcategories, live filter across both levels |
 | `/[lang]/category/[slug]` | One route serving both levels: a parent shows its children as refinements, a child shows its siblings |
 | `/[lang]/product/[slug]` | The Trade Desk — the deliverable |
+| `/[lang]/search` | Server-rendered results — text match, category facets computed pre-filter, sort and filters as links so the page works and is linkable without JavaScript |
+| `/[lang]/deals` | Ranked by the real spread between a listing's minimum-order price and its floor price — no countdown timers |
+| `/[lang]/rfq/new` | The standalone sourcing request; drafts to `localStorage` so a twelve-field form survives a lost connection |
+| `/[lang]/cart` | Real courier and landed-cost computation over the buyer's actual cart lines and district |
+| `/[lang]/store/[slug]` | A supplier storefront — the same identity block and trust-ledger component the product page uses, not a copy of it |
+| `/[lang]/account`, `/account/orders`, `/account/rfq/[id]` | Honest signed-out state backed by real `localStorage` (cart, saved, recently viewed); the RFQ thread is the multi-supplier quote comparison, ranked by landed cost at each quote's own quantity |
+| `/[lang]/messages`, `/[lang]/notifications` | Fixture threads and a fixture feed, both stated as such; the composer persists a draft per thread |
+| `/[lang]/sign-in`, `/[lang]/register` | Real client-side validation (phone shape, business name); no identity service exists behind it, and the form says so after submit rather than faking success |
+| `/[lang]/[...slug]` | One catch-all serving all seventeen informational pages (`/help*`, `/sell*`, `/legal/*`, `/about`, `/careers`, `/how-it-works`, `/install`) from `src/data/pages.ts`, plus the terminal 404 for anything else under a locale |
 
-**275 pages prerender statically**: every category and subcategory in both
-locales, plus the products and the directory.
+**337 pages prerender statically**: every category and subcategory in both
+locales, the products, the directory, every storefront, every content page, and
+the RFQ thread fixture. `/search` and `/messages` render on demand because they
+key off a query string or resolve which thread to open.
+
+Every internal link resolves — verified by crawling both locale homes to
+exhaustion (1,042 URLs) after each change; see `npm test` for the pricing/mix/
+landed-cost/search assertions.
 
 ### The hero
 
@@ -262,6 +277,12 @@ Nothing here pretends to be backed by a service it is not.
 | Product imagery | `scripts/generate-media.mjs` | Procedural PNGs (a PNG encoder over zlib plus SDF rasterisation) rather than stock photos, so the zoom lens has a genuinely higher-resolution source and `next/image` is exercised against real files. |
 | Category counts | `src/data/categories.ts` | A catalogue aggregate. Main-category totals are summed from their children rather than stored, so the two figures cannot disagree; only the leaf numbers are fixtures. |
 | Category listings | `getCategoryProducts()` | A filtered catalogue query. Sample products exist for a few branches only, and pages say so instead of padding the grid with unrelated items. |
+| Checkout | `features/cart/cart-view.tsx` | Payment gateway + order service. The button is disabled with a note explaining why, rather than a live-looking control that silently does nothing. |
+| Sign-in / register | `features/account/auth-form.tsx` | Identity service + SMS gateway for the OTP. Validation (phone shape, business name) runs for real client-side; submission ends in an honest "no service behind this yet" state instead of a fabricated success. |
+| RFQ quote threads | `src/data/account.ts` | The quotation service. One fixture thread (`RFQ-24817`) with three suppliers, built to exercise the actual design problem: ranking quotes that each carry a different quantity, lead time and validity by landed cost per unit rather than headline price. |
+| Messages / notifications | `src/data/account.ts` | The messaging service and the push/SMS notification pipeline. Two fixture threads and a five-entry feed; the composer persists a real per-thread draft to `localStorage` and says the send is stubbed only after an attempt. |
+| Search | `src/lib/search.ts` | `GET /v1/search`. Ranking, category facets and sorting are real logic over the sample index — swapping the backend is replacing `searchCatalogue()`'s body with a fetch. |
+| Order history | `/account/orders` | The order service. Deliberately empty rather than fabricated — an invented order a buyer believes is in flight is worse than no history at all. |
 
 ### Fields the API must add
 

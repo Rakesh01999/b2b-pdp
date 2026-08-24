@@ -274,6 +274,11 @@ export interface ProductCard {
    */
   madeToOrder: boolean;
   sellerName: string;
+  /**
+   * Leaf category slug, so a card can be filtered without loading its Product.
+   * A search index that cannot narrow by category is a text box, not search.
+   */
+  categorySlug: string;
 }
 
 /* ----------------------------------------------------------------- shipping */

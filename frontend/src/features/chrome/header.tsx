@@ -4,6 +4,7 @@ import { PrimaryBar } from './primary-bar';
 import { DistrictSelect, LanguageSwitch, ThemeToggle } from './controls';
 import { MegaMenu } from '@/features/categories/mega-menu';
 import { NAV_CATEGORIES, TRENDING_TERMS } from '@/lib/catalog';
+import { MESSAGE_THREADS, NOTIFICATIONS } from '@/data/account';
 import { localeHref, pick, t, type Locale } from '@/lib/i18n';
 
 /**
@@ -18,6 +19,14 @@ import { localeHref, pick, t, type Locale } from '@/lib/i18n';
  * so the category tree and the utility links cost no client JavaScript.
  */
 export function Header({ lang }: { lang: Locale }) {
+  // Both badges are counted, not decided. A hardcoded `2` on the message icon
+  // is a number that is wrong the moment anything changes, and a badge a buyer
+  // learns to distrust is worse than no badge at all.
+  const awaitingReply = MESSAGE_THREADS.filter(
+    (thread) => thread.messages[thread.messages.length - 1].from === 'seller',
+  ).length;
+  const unreadNotifications = NOTIFICATIONS.filter((entry) => !entry.read).length;
+
   return (
     <>
       {/* Raised above the pinned row below it: the language and district
@@ -51,7 +60,13 @@ export function Header({ lang }: { lang: Locale }) {
         </div>
       </div>
 
-      <PrimaryBar lang={lang} categories={NAV_CATEGORIES} trending={TRENDING_TERMS} />
+      <PrimaryBar
+        lang={lang}
+        categories={NAV_CATEGORIES}
+        trending={TRENDING_TERMS}
+        messageCount={awaitingReply}
+        notificationCount={unreadNotifications}
+      />
 
       {/* Category rail. Scrolls away and slides under the pinned bar — search
           stays the pinned discovery tool, and the full tree is one click away.

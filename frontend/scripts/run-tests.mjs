@@ -9,3 +9,4 @@ import { pathToFileURL } from 'node:url';
 
 register('./alias-loader.mjs', pathToFileURL(import.meta.filename));
 await import('./test-pricing.mjs');
+await import('./test-search.mjs');

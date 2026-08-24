@@ -5,7 +5,7 @@ import { ArrowRight } from 'lucide-react';
 import { Badge, Container, SectionHeading } from '@/components/ui/primitives';
 import { Hero } from '@/features/home/hero';
 import { CategoryTiles } from '@/features/home/category-tiles';
-import { ProductRail } from '@/features/product/components/product-card';
+import { RecentListings } from '@/features/home/recent-listings';
 import { getCards } from '@/lib/catalog';
 import { PRODUCTS } from '@/data/catalog';
 import { HREFLANG, LOCALES, isLocale, localeHref, pick, t } from '@/lib/i18n';
@@ -93,7 +93,9 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
 
-  const cards = await getCards(12);
+  // The whole sample catalogue, not a fixed twelve — this section paginates
+  // client-side over whatever it is handed, so it is fed everything there is.
+  const cards = await getCards(100);
 
   return (
     <>
@@ -117,7 +119,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
               </Link>
             }
           />
-          <ProductRail cards={cards} lang={lang} />
+          <RecentListings cards={cards} lang={lang} />
         </section>
 
         <section aria-labelledby="review-heading" className="pt-14">

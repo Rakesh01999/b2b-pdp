@@ -465,6 +465,8 @@ const STRINGS = {
   'misc.close': { en: 'Close', bn: 'বন্ধ' },
   'misc.of': { en: 'of', bn: 'এর' },
   'misc.and': { en: 'and', bn: 'এবং' },
+  'pagination.previous': { en: 'Previous page', bn: 'পূর্ববর্তী পৃষ্ঠা' },
+  'pagination.next': { en: 'Next page', bn: 'পরবর্তী পৃষ্ঠা' },
   'misc.backHome': { en: 'Back to home', bn: 'হোমে ফিরুন' },
   'misc.viewAll': { en: 'View all', bn: 'সব দেখুন' },
   'misc.total': { en: 'Total', bn: 'মোট' },

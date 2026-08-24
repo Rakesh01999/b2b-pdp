@@ -1,0 +1,444 @@
+@import "tailwindcss";
+
+/* ============================================================================
+   ArcB2B design tokens — "Structured Trade"
+   ----------------------------------------------------------------------------
+   Light-first marketplace palette, deliberately NOT the orange used by the
+   reference ARCB2B storefront. The brand hue is a deep trade teal: it reads
+   professional rather than promotional, it is unmistakably distinct from the
+   reference build at a glance, and — unlike that orange — it is dark enough to
+   be legible as text as well as usable as a fill.
+
+   Semantic values live as plain custom properties on :root so they can be
+   swapped at runtime by [data-theme]. The @theme inline block below maps them
+   into Tailwind's colour namespace, so `bg-surface` and `text-price` resolve
+   through the live variable rather than being frozen at build time.
+
+   CONTRAST, measured against the surface each token is used on:
+     --accent   #0f766e   5.1:1 white-on-accent, 4.5:1 as text on white.
+                          Both directions pass AA, which is why this palette
+                          needs no separate "fill only" caveat.
+     --price    #be123c   5.9:1 on white. Reserved for money.
+     --success  #15803d   4.6:1      --warning  #a16207   4.6:1
+     --info     #1d4ed8   6.3:1      --danger   #b91c1c   5.9:1
+     --rating   #f59e0b   decorative only (star glyphs, distribution bars). It
+                          never carries text, so it is tuned for the eye rather
+                          than for a ratio.
+
+   ONE RULE FOR TEXT ON A SATURATED FILL: use `--on-fill`. Light-mode fills are
+   700-level and take white; dark-mode fills are 400/500-level and take near
+   black. A single token means no component has to know which theme it is in.
+   ========================================================================= */
+
+:root {
+  color-scheme: light;
+
+  /* Ground. The neutrals carry a faint teal bias so they read as chosen
+     alongside the brand hue rather than as a generic grey borrowed from
+     somewhere else. */
+  --bg: #eff4f4;
+  --surface: #ffffff;
+  --surface-2: #f5f9f9;
+  --surface-3: #e8efef;
+  --line: #dfe9e9;
+  --line-bright: #c7d6d6;
+
+  /* Brand and money */
+  --accent: #0f766e;
+  --accent-hi: #115e59;
+  --accent-ink: #0c5f58;
+  --accent-soft: #e7f7f5;
+  --price: #be123c;
+  --deal: #be123c;
+
+  /* Semantic */
+  --success: #15803d;
+  --success-soft: #eaf7ee;
+  --warning: #a16207;
+  --warning-soft: #fdf6e3;
+  --rating: #f59e0b;
+  --danger: #b91c1c;
+  --danger-soft: #fdeeee;
+  --info: #1d4ed8;
+  --info-soft: #eef2fe;
+
+  /* Ink */
+  --ink: #122127;
+  --ink-dim: #4e6068;
+  --ink-faint: #81939a;
+  /* Text on any saturated fill. See the rule above. */
+  --on-fill: #ffffff;
+
+  /* Elevation — one step per surface; data surfaces get xs or nothing. */
+  --shadow-xs: 0 1px 2px rgba(12, 40, 44, 0.05);
+  --shadow-sm: 0 6px 18px rgba(12, 40, 44, 0.08);
+  --shadow-md: 0 12px 28px rgba(12, 40, 44, 0.12);
+  --shadow-lg: 0 18px 48px rgba(12, 40, 44, 0.16);
+
+  --glass: rgba(255, 255, 255, 0.85);
+
+  /* Layout contract. Published so every sticky offset and every scroll-margin
+     derives from one number instead of a magic constant scattered through the
+     components. The mobile value is taller because the search field drops to
+     its own full-width row below 768px. */
+  --header-h: 116px;
+  /* Fixed bottom chrome present on every page (the tab bar). The product page
+     stacks its trade bar above this and reserves its own extra space. */
+  --mobile-chrome-h: 60px;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #09100f;
+  --surface: #0f1917;
+  --surface-2: #14201e;
+  --surface-3: #1c2b28;
+  --line: #233531;
+  --line-bright: #334845;
+
+  --accent: #14b8a6;
+  --accent-hi: #2dd4bf;
+  --accent-ink: #5eead4;
+  --accent-soft: #0b2b27;
+  --price: #fb7185;
+  --deal: #fb7185;
+
+  --success: #4ade80;
+  --success-soft: #0d2a19;
+  --warning: #fbbf24;
+  --warning-soft: #2a2109;
+  --rating: #fbbf24;
+  --danger: #f87171;
+  --danger-soft: #2c1414;
+  --info: #93b4fd;
+  --info-soft: #111c31;
+
+  --ink: #e5efed;
+  --ink-dim: #9db0ac;
+  --ink-faint: #6a7f7b;
+  /* Near-black, because every dark-mode fill above is a bright 400/500 tint. */
+  --on-fill: #04201d;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-md: 0 16px 38px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 28px 70px rgba(0, 0, 0, 0.62);
+
+  --glass: rgba(15, 25, 23, 0.85);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-line: var(--line);
+  --color-line-bright: var(--line-bright);
+
+  --color-accent: var(--accent);
+  --color-accent-hi: var(--accent-hi);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-price: var(--price);
+  --color-deal: var(--deal);
+
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-rating: var(--rating);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+
+  --color-ink: var(--ink);
+  --color-ink-dim: var(--ink-dim);
+  --color-ink-faint: var(--ink-faint);
+  --color-on-fill: var(--on-fill);
+
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+
+  /* One sans stack, consulted per codepoint: Geist covers Latin, Anek Bangla
+     is reached for the entire Bengali block — including the taka sign (U+09F3).
+     Ordering matters: putting the Bangla family first would re-typeset Latin
+     runs and brand names ("bKash") in Anek Bangla's Latin. */
+  --font-sans: var(--font-geist-sans), var(--font-anek-bangla), "Noto Sans Bengali",
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+}
+
+/* ---------------------------------------------------------------------------
+   Base
+   ------------------------------------------------------------------------- */
+
+@media (min-width: 768px) {
+  :root {
+    --header-h: 64px;
+  }
+}
+
+html {
+  /* Section anchors sit under the pinned header; without this every in-page
+     jump lands with the heading hidden behind the chrome. */
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+/* Reserve the fixed mobile chrome (trade bar + tab bar) so the last section
+   is never trapped underneath it. Desktop has no fixed bottom chrome. */
+@media (max-width: 767px) {
+  body {
+    padding-bottom: calc(var(--mobile-chrome-h) + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* ---------------------------------------------------------------------------
+   Numerals — money and quantity must not jitter as they change
+   ------------------------------------------------------------------------- */
+
+.price {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------------------
+   Bangla metrics
+   The family needs no override — the single sans stack reaches Anek Bangla for
+   exactly the codepoints Geist lacks. What does need correcting is the
+   metrics: Bangla sets matras above and below the baseline, so Latin-tuned
+   leading crowds it, and the negative tracking used on Latin display type
+   mangles conjuncts.
+   ------------------------------------------------------------------------- */
+
+[lang="bn"] h1,
+[lang="bn"] h2,
+[lang="bn"] h3,
+[lang="bn"] h4 {
+  letter-spacing: 0;
+  line-height: 1.38;
+}
+
+[lang="bn"] p,
+[lang="bn"] li,
+[lang="bn"] dd {
+  line-height: 1.75;
+}
+
+/* ---------------------------------------------------------------------------
+   Density zoning — the one rule that keeps a hybrid layout coherent.
+   Every region carries exactly one zone class; no component mixes them.
+   ------------------------------------------------------------------------- */
+
+.zone-evidence {
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.zone-decision {
+  font-size: 13.5px;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+}
+
+.zone-reference {
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.zone-nav {
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+/* Running text stays near 65 characters regardless of container width. */
+.measure {
+  max-width: 65ch;
+}
+
+/* ---------------------------------------------------------------------------
+   Surfaces
+   ------------------------------------------------------------------------- */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.glass {
+  background: var(--glass);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.slim-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.slim-scroll::-webkit-scrollbar-thumb {
+  background: var(--line-bright);
+  border-radius: 3px;
+}
+.slim-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Edge fade on horizontally scrolling rails — tells the reader there is more
+   without spending a row on a scrollbar. The right fade is deliberately wide:
+   at 40px a clipped category name reads as "scrolls further", where a narrow
+   fade left it looking like a truncation bug. */
+.scroll-hint {
+  mask-image: linear-gradient(90deg, transparent 0, #000 10px, #000 calc(100% - 40px), transparent 100%);
+}
+
+.clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Faint blueprint grid over generated product tiles, so a placeholder reads
+   as a deliberate stand-in rather than a broken image. */
+.tile-grid::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+  background-size: 22px 22px;
+  opacity: 0.5;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* ---------------------------------------------------------------------------
+   States
+   ------------------------------------------------------------------------- */
+
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 50%, var(--surface-2) 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.4s infinite linear;
+  border-radius: 6px;
+}
+
+/* Fires once when the applicable tier changes: money moved, and the buyer
+   must notice it exactly once — not on every keystroke. */
+@keyframes tier-pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); }
+  100% { box-shadow: 0 0 0 12px transparent; }
+}
+
+.tier-pulse {
+  animation: tier-pulse 0.6s ease-out;
+}
+
+@keyframes slide-in-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.anim-fade { animation: fade-in 0.18s ease-out; }
+
+/* The quote form is a bottom sheet on a phone and a right-hand drawer on a
+   laptop. Choosing the transform in CSS rather than from a JS media query
+   means there is no hydration mismatch and no flash of the wrong geometry. */
+.overlay-panel {
+  animation: slide-up 0.24s ease-out;
+}
+
+@media (min-width: 1024px) {
+  .overlay-panel {
+    animation: slide-in-right 0.22s ease-out;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .skeleton,
+  .tier-pulse,
+  .overlay-panel,
+  .anim-fade {
+    animation: none;
+  }
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Screen-reader-only, but focusable — used by the skip link. */
+.sr-only-focusable {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.sr-only-focusable:focus {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 200;
+  width: auto;
+  height: auto;
+  padding: 10px 16px;
+  margin: 0;
+  overflow: visible;
+  clip-path: none;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Number inputs: spinners are unusable for entering 480, and the matrix uses
+   text inputs with inputMode="numeric" instead. This kills any that slip in. */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}

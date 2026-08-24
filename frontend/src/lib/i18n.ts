@@ -1,0 +1,496 @@
+import type { Bilingual, Lang } from './types';
+
+/**
+ * Localisation.
+ *
+ * The locale is a route segment (`/en/...`, `/bn/...`), not client state. That
+ * choice is what lets every bilingual string render on the server: the page
+ * stays fully static per language, `<html lang>` is correct, `hreflang`
+ * alternates come for free, and the product page ships no i18n JavaScript at
+ * all. Switching language is a navigation — which is the honest behaviour for
+ * a localised site, and keeps the two versions independently indexable.
+ *
+ * Strings are stored with both scripts side by side rather than in two parallel
+ * files, so a translator (or a reviewer) sees the pair together and neither can
+ * silently drift.
+ */
+
+export const LOCALES = ['en', 'bn'] as const;
+export type Locale = (typeof LOCALES)[number];
+export const DEFAULT_LOCALE: Locale = 'en';
+
+export function isLocale(value: string): value is Locale {
+  return (LOCALES as readonly string[]).includes(value);
+}
+
+/** Resolves a bilingual value, falling back to English when `bn` is absent. */
+export function pick(value: Bilingual | undefined, lang: Lang): string {
+  if (!value) return '';
+  return (lang === 'bn' ? value.bn : value.en) || value.en;
+}
+
+const STRINGS = {
+  /* ---------------------------------------------------------------- chrome */
+  'brand.tagline': {
+    en: "Bangladesh's wholesale sourcing marketplace",
+    bn: 'বাংলাদেশের পাইকারি সোর্সিং মার্কেটপ্লেস',
+  },
+  'chrome.skipToContent': { en: 'Skip to product details', bn: 'পণ্যের বিবরণে যান' },
+  'chrome.deliverTo': { en: 'Deliver to', bn: 'ডেলিভারি' },
+  'chrome.howItWorks': { en: 'How it works', bn: 'কীভাবে কাজ করে' },
+  'chrome.myOrders': { en: 'My orders', bn: 'আমার অর্ডার' },
+  'chrome.sellOnArcB2B': { en: 'Sell on ArcB2B', bn: 'ArcB2B-এ বিক্রি' },
+  'chrome.help': { en: 'Help', bn: 'সহায়তা' },
+  'chrome.searchPlaceholder': { en: 'What are you sourcing today?', bn: 'আজ কী সোর্স করছেন?' },
+  'chrome.searchLabel': { en: 'Search products', bn: 'পণ্য খুঁজুন' },
+  'chrome.searchScope': { en: 'Search within', bn: 'এর মধ্যে খুঁজুন' },
+  'chrome.searchAll': { en: 'All categories', bn: 'সব ক্যাটাগরি' },
+  'chrome.search': { en: 'Search', bn: 'খুঁজুন' },
+  'chrome.trending': { en: 'Trending', bn: 'ট্রেন্ডিং' },
+  'chrome.allCategories': { en: 'All Categories', bn: 'সব ক্যাটাগরি' },
+  'chrome.flashDeals': { en: 'Flash Deals', bn: 'ফ্ল্যাশ ডিল' },
+  'chrome.requestQuote': { en: 'Request a Quote', bn: 'কোটেশন অনুরোধ' },
+  'chrome.messages': { en: 'Messages', bn: 'বার্তা' },
+  'chrome.notifications': { en: 'Notifications', bn: 'নোটিফিকেশন' },
+  'chrome.cart': { en: 'Cart', bn: 'কার্ট' },
+  'chrome.account': { en: 'Account', bn: 'অ্যাকাউন্ট' },
+  'chrome.signIn': { en: 'Sign in', bn: 'সাইন ইন' },
+  'chrome.joinFree': { en: 'Join free', bn: 'ফ্রি জয়েন' },
+  'chrome.home': { en: 'Home', bn: 'হোম' },
+  'chrome.categories': { en: 'Categories', bn: 'ক্যাটাগরি' },
+  'chrome.theme': { en: 'Switch colour theme', bn: 'থিম পরিবর্তন' },
+  'chrome.language': { en: 'Language', bn: 'ভাষা' },
+  'chrome.backToResults': { en: 'Back to results', bn: 'ফলাফলে ফিরুন' },
+  'chrome.breadcrumb': { en: 'Breadcrumb', bn: 'ব্রেডক্রাম্ব' },
+  'chrome.fullPath': { en: 'Show full path', bn: 'সম্পূর্ণ পথ' },
+
+  /* --------------------------------------------------------------- summary */
+  'product.sold': { en: 'sold', bn: 'বিক্রি' },
+  'product.reviews': { en: 'reviews', bn: 'রিভিউ' },
+  'product.noReviewsYet': { en: 'No reviews yet', bn: 'এখনও কোনও রিভিউ নেই' },
+  'product.sku': { en: 'SKU', bn: 'এসকেইউ' },
+  'product.keyAttributes': { en: 'At a glance', bn: 'এক নজরে' },
+  'product.fullSpecs': { en: 'Full specifications', bn: 'সম্পূর্ণ স্পেসিফিকেশন' },
+  'product.localStock': { en: 'Local stock', bn: 'স্থানীয় স্টক' },
+  'product.sourcedToOrder': { en: 'Sourced to order', bn: 'অর্ডারে সোর্সিং' },
+  'product.dispatch': { en: 'dispatch', bn: 'ডেলিভারি' },
+  'product.bestSeller': { en: 'Best seller', bn: 'বেস্ট সেলার' },
+  'product.new': { en: 'New', bn: 'নতুন' },
+  'product.factoryDirect': { en: 'Factory direct', bn: 'ফ্যাক্টরি ডাইরেক্ট' },
+  'product.lowStock': { en: 'Low stock', bn: 'স্টক কম' },
+  'product.outOfStock': { en: 'Out of stock', bn: 'স্টক শেষ' },
+
+  /* --------------------------------------------------------------- gallery */
+  'gallery.zoomHint': { en: 'Hover to zoom', bn: 'জুম করতে হোভার' },
+  'gallery.zoomUnavailable': { en: 'Zoom unavailable', bn: 'জুম নেই' },
+  'gallery.fullscreen': { en: 'View fullscreen', bn: 'ফুলস্ক্রিন' },
+  'gallery.close': { en: 'Close', bn: 'বন্ধ' },
+  'gallery.previous': { en: 'Previous image', bn: 'পূর্ববর্তী ছবি' },
+  'gallery.next': { en: 'Next image', bn: 'পরবর্তী ছবি' },
+  'gallery.playVideo': { en: 'Play product video', bn: 'ভিডিও দেখুন' },
+  'gallery.studioPhoto': { en: 'Studio photo', bn: 'স্টুডিও ছবি' },
+  'gallery.supplierPhoto': { en: 'Supplier photo', bn: 'সরবরাহকারীর ছবি' },
+  'gallery.verified': { en: 'verified', bn: 'যাচাই' },
+  'gallery.imageUnavailable': { en: 'Image unavailable', bn: 'ছবি নেই' },
+  'gallery.thumbnails': { en: 'Product images', bn: 'পণ্যের ছবি' },
+
+  /* ----------------------------------------------------------------- ladder */
+  'ladder.title': { en: 'Quantity price ladder', bn: 'পরিমাণ অনুযায়ী মূল্য' },
+  'ladder.hint': { en: 'Tap a tier to set quantity', bn: 'পরিমাণ নির্ধারণে ট্যাপ করুন' },
+  'ladder.best': { en: 'Best', bn: 'সেরা' },
+  'ladder.per': { en: 'per', bn: 'প্রতি' },
+  'ladder.addMore': { en: 'Add', bn: 'আরও' },
+  'ladder.more': { en: 'more for', bn: 'নিলে' },
+  'ladder.save': { en: 'save', bn: 'সাশ্রয়' },
+  'ladder.bestPriceUnlocked': { en: 'Best price unlocked', bn: 'সেরা মূল্য পেয়েছেন' },
+  'ladder.from': { en: 'From', bn: 'শুরু' },
+  'ladder.asLowAs': { en: 'As low as', bn: 'সর্বনিম্ন' },
+  'ladder.atMinimum': { en: 'at the minimum order of', bn: 'সর্বনিম্ন অর্ডারে' },
+  'ladder.atTopTier': { en: 'at', bn: '—' },
+  'ladder.atQty': { en: 'at', bn: '—' },
+  'ladder.volumeAbove': {
+    en: 'Buying above the top tier? Request a volume quote',
+    bn: 'সর্বোচ্চ টিয়ারের বেশি? ভলিউম কোট চান',
+  },
+  'ladder.priceOnRequest': { en: 'Price on request', bn: 'মূল্য জানতে যোগাযোগ' },
+
+  /* ----------------------------------------------------------------- matrix */
+  'matrix.title': { en: 'Your mix', bn: 'আপনার মিক্স' },
+  'matrix.subtitle': {
+    en: 'Enter a quantity per variant — the minimum applies to the total, not each cell',
+    bn: 'প্রতি ভ্যারিয়েন্টে পরিমাণ দিন — সর্বনিম্ন প্রযোজ্য মোট পরিমাণে',
+  },
+  'matrix.rowTotal': { en: 'Row total', bn: 'সারির মোট' },
+  'matrix.available': { en: 'available', bn: 'স্টক' },
+  'matrix.total': { en: 'Total', bn: 'মোট' },
+  'matrix.variant': { en: 'Variant', bn: 'ভ্যারিয়েন্ট' },
+  'matrix.qty': { en: 'Qty', bn: 'পরিমাণ' },
+  'matrix.distribute': { en: 'Distribute evenly', bn: 'সমানভাগে ভাগ করুন' },
+  'matrix.clear': { en: 'Clear', bn: 'মুছুন' },
+  'matrix.paste': { en: 'Paste from spreadsheet', bn: 'স্প্রেডশিট থেকে পেস্ট' },
+  'matrix.pasteTitle': { en: 'Review pasted quantities', bn: 'পেস্ট করা পরিমাণ দেখুন' },
+  'matrix.pasteHint': {
+    en: 'Paste rows and columns copied from Excel or Google Sheets. Nothing is applied until you confirm.',
+    bn: 'এক্সেল বা গুগল শিট থেকে কপি করে পেস্ট করুন। নিশ্চিত করার আগে কিছুই প্রয়োগ হবে না।',
+  },
+  'matrix.pasteApply': { en: 'Apply changes', bn: 'পরিবর্তন প্রয়োগ' },
+  'matrix.pasteCancel': { en: 'Cancel', bn: 'বাতিল' },
+  'matrix.willChange': { en: 'will change', bn: 'পরিবর্তন হবে' },
+  'matrix.sourced': { en: 'sourced', bn: 'সোর্সিং' },
+  'matrix.unavailable': { en: 'none', bn: 'নেই' },
+  'matrix.openSheet': { en: 'Choose your mix', bn: 'আপনার মিক্স বাছুন' },
+  'matrix.done': { en: 'Done', bn: 'সম্পন্ন' },
+
+  /* -------------------------------------------------------------------- MOQ */
+  'moq.label': { en: 'MOQ', bn: 'সর্বনিম্ন' },
+  'moq.minimumIs': { en: 'Minimum order is', bn: 'সর্বনিম্ন অর্ডার' },
+  'moq.addMore': { en: 'add', bn: 'আরও দিন' },
+  'moq.setTo': { en: 'Set to', bn: 'নির্ধারণ করুন' },
+  'moq.stepRule': { en: 'Order in multiples of', bn: 'গুণিতকে অর্ডার করুন' },
+  'moq.roundUp': { en: 'Round up to', bn: 'বাড়িয়ে নিন' },
+
+  /* ----------------------------------------------------------- landed cost */
+  'landed.title': { en: 'Landed cost', bn: 'সর্বমোট খরচ' },
+  'landed.estimated': { en: 'Estimated until checkout', bn: 'চেকআউট পর্যন্ত আনুমানিক' },
+  'landed.goods': { en: 'Goods subtotal', bn: 'পণ্যের সাবটোটাল' },
+  'landed.surcharge': { en: 'Variant surcharge', bn: 'ভ্যারিয়েন্ট সারচার্জ' },
+  'landed.courier': { en: 'Courier', bn: 'কুরিয়ার' },
+  'landed.paymentFee': { en: 'fee', bn: 'ফি' },
+  'landed.total': { en: 'Landed total', bn: 'সর্বমোট' },
+  'landed.perUnit': { en: 'Per unit landed', bn: 'প্রতি একক সর্বমোট' },
+  'landed.perUnitHelp': {
+    en: 'What you actually pay per piece, including delivery and payment fee — the figure to set your shelf price from.',
+    bn: 'ডেলিভারি ও পেমেন্ট ফি সহ প্রতি পিসে প্রকৃত খরচ — এই হিসাবেই বিক্রয়মূল্য ঠিক করুন।',
+  },
+  'landed.breakdown': { en: 'Breakdown', bn: 'বিস্তারিত' },
+  'landed.freeQualifies': { en: 'Free delivery applied', bn: 'ফ্রি ডেলিভারি প্রযোজ্য' },
+  'landed.freeShortfall': { en: 'to free delivery', bn: 'হলে ফ্রি ডেলিভারি' },
+  'landed.payWith': { en: 'Pay with', bn: 'পেমেন্ট' },
+  'landed.enterQty': {
+    en: 'Enter a quantity to see your landed cost',
+    bn: 'সর্বমোট খরচ দেখতে পরিমাণ দিন',
+  },
+
+  /* ------------------------------------------------------------------- CTAs */
+  'cta.addToCart': { en: 'Add mix to cart', bn: 'মিক্স কার্টে যোগ করুন' },
+  'cta.startSourcing': { en: 'Start sourcing order', bn: 'সোর্সিং অর্ডার শুরু করুন' },
+  'cta.requestQuote': { en: 'Request quote', bn: 'কোট চান' },
+  'cta.requestVolumeQuote': { en: 'Request volume quote', bn: 'ভলিউম কোট চান' },
+  'cta.requestCustomQuote': { en: 'Request custom quote', bn: 'কাস্টম কোট চান' },
+  'cta.notifyMe': { en: 'Notify me when available', bn: 'স্টকে এলে জানান' },
+  'cta.orderSample': { en: 'Order sample', bn: 'স্যাম্পল নিন' },
+  'cta.chat': { en: 'Chat', bn: 'চ্যাট' },
+  'cta.save': { en: 'Save', bn: 'সেভ' },
+  'cta.saved': { en: 'Saved', bn: 'সেভ হয়েছে' },
+  'cta.share': { en: 'Share', bn: 'শেয়ার' },
+  'cta.linkCopied': { en: 'Link copied', bn: 'লিংক কপি হয়েছে' },
+  'cta.added': { en: 'Added to cart', bn: 'কার্টে যোগ হয়েছে' },
+  'cta.adding': { en: 'Adding…', bn: 'যোগ হচ্ছে…' },
+  'cta.addFailed': { en: 'Could not add to cart', bn: 'কার্টে যোগ করা যায়নি' },
+  'cta.retry': { en: 'Try again', bn: 'আবার চেষ্টা' },
+  'cta.continueBrowsing': { en: 'Continue browsing', bn: 'ব্রাউজ করুন' },
+  'cta.goToCart': { en: 'Go to cart', bn: 'কার্টে যান' },
+  'cta.contactSeller': { en: 'Message seller', bn: 'বার্তা পাঠান' },
+  'cta.visitStore': { en: 'Visit store', bn: 'স্টোর দেখুন' },
+
+  /* --------------------------------------------------------------- assurance */
+  'assurance.escrow': {
+    en: 'Escrow — payment released on delivery confirmation',
+    bn: 'এসক্রো — ডেলিভারি নিশ্চিত হলে পেমেন্ট',
+  },
+  'assurance.dispute': { en: 'day dispute window, photo evidence', bn: 'দিনের ডিসপিউট, ছবি প্রমাণে' },
+  'assurance.payment': { en: 'bKash · Nagad · Rocket · bank transfer', bn: 'বিকাশ · নগদ · রকেট · ব্যাংক' },
+  'assurance.shipsNow': { en: 'In local stock — ships now', bn: 'স্থানীয় স্টকে — এখনই' },
+  'assurance.shipsIn': { en: 'Dispatches in', bn: 'ডেলিভারি' },
+  'assurance.afterPayment': {
+    en: 'after payment confirmation',
+    bn: 'পেমেন্ট নিশ্চিত হওয়ার পর',
+  },
+
+  /* ------------------------------------------------------------------ seller */
+  'seller.soldBy': { en: 'Sold by', bn: 'বিক্রেতা' },
+  'seller.sourcedFrom': { en: 'Sourced from', bn: 'সোর্স' },
+  'seller.verified': { en: 'Verified', bn: 'যাচাইকৃত' },
+  'seller.escrowSeller': { en: 'Escrow seller', bn: 'এসক্রো বিক্রেতা' },
+  'seller.years': { en: 'yrs trading', bn: 'বছর' },
+  'seller.skus': { en: 'SKUs', bn: 'পণ্য' },
+  'seller.verifiedFactory': { en: 'verified factory', bn: 'যাচাইকৃত ফ্যাক্টরি' },
+  'seller.metricsTitle': { en: 'Measured performance', bn: 'পরিমাপিত পারফরম্যান্স' },
+  'seller.metric.response': { en: 'Response', bn: 'রেসপন্স' },
+  'seller.metric.onTime': { en: 'On-time', bn: 'সময়মতো' },
+  'seller.metric.reorder': { en: 'Reorder', bn: 'রি-অর্ডার' },
+  'seller.metric.disputes': { en: 'Disputes', bn: 'ডিসপিউট' },
+  'seller.metric.response.def': {
+    en: 'Share of buyer messages answered within 24 hours, last 90 days.',
+    bn: 'গত ৯০ দিনে ২৪ ঘণ্টার মধ্যে উত্তর দেওয়া বার্তার হার।',
+  },
+  'seller.metric.onTime.def': {
+    en: 'Share of orders dispatched inside the promised window.',
+    bn: 'প্রতিশ্রুত সময়ে পাঠানো অর্ডারের হার।',
+  },
+  'seller.metric.reorder.def': {
+    en: 'Share of buyers who ordered again within six months.',
+    bn: 'ছয় মাসের মধ্যে পুনরায় অর্ডার করা ক্রেতার হার।',
+  },
+  'seller.metric.disputes.def': {
+    en: 'Share of disputes resolved for the buyer or by agreement.',
+    bn: 'ক্রেতার পক্ষে বা সমঝোতায় নিষ্পত্তি হওয়া ডিসপিউটের হার।',
+  },
+  'seller.notEnoughData': { en: 'Not enough orders yet', bn: 'পর্যাপ্ত অর্ডার হয়নি' },
+  'seller.fromOrders': { en: 'from', bn: 'ভিত্তি' },
+  'seller.orders': { en: 'orders', bn: 'অর্ডার' },
+  'seller.messages': { en: 'messages', bn: 'বার্তা' },
+  'seller.certifications': { en: 'Certifications', bn: 'সার্টিফিকেশন' },
+  'seller.viewDocument': { en: 'View verified document', bn: 'যাচাইকৃত নথি' },
+  'seller.underReview': {
+    en: 'This seller is under review — orders are paused',
+    bn: 'এই বিক্রেতা পর্যালোচনায় — অর্ডার বন্ধ',
+  },
+
+  /* ---------------------------------------------------------------- sections */
+  'section.overview': { en: 'Overview', bn: 'বিবরণ' },
+  'section.specifications': { en: 'Specifications', bn: 'স্পেসিফিকেশন' },
+  'section.shipping': { en: 'Shipping', bn: 'ডেলিভারি' },
+  'section.reviews': { en: 'Reviews', bn: 'রিভিউ' },
+  'section.seller': { en: 'Seller', bn: 'বিক্রেতা' },
+  'section.nav': { en: 'Product sections', bn: 'পণ্যের অংশ' },
+
+  /* ------------------------------------------------------------- spec groups */
+  'spec.general': { en: 'General', bn: 'সাধারণ' },
+  'spec.technical': { en: 'Technical', bn: 'টেকনিক্যাল' },
+  'spec.packaging': { en: 'Packaging & logistics', bn: 'প্যাকেজিং ও লজিস্টিকস' },
+  'spec.trade': { en: 'Trade terms', bn: 'ট্রেড শর্তাবলী' },
+  'spec.compliance': { en: 'Compliance', bn: 'কমপ্লায়েন্স' },
+  'spec.empty': {
+    en: 'Specifications are being finalised for this listing.',
+    bn: 'এই লিস্টিংয়ের স্পেসিফিকেশন চূড়ান্ত হচ্ছে।',
+  },
+  'spec.requestDetails': { en: 'Request details', bn: 'বিবরণ চান' },
+
+  /* ---------------------------------------------------------------- shipping */
+  'shipping.title': { en: 'Shipping & delivery', bn: 'শিপিং ও ডেলিভারি' },
+  'shipping.deliverTo': { en: 'Deliver to', bn: 'ডেলিভারি ঠিকানা' },
+  'shipping.courier': { en: 'Courier', bn: 'কুরিয়ার' },
+  'shipping.cost': { en: 'Cost', bn: 'খরচ' },
+  'shipping.window': { en: 'Window', bn: 'সময়' },
+  'shipping.notes': { en: 'Notes', bn: 'মন্তব্য' },
+  'shipping.cheapest': { en: 'Cheapest', bn: 'সবচেয়ে কম' },
+  'shipping.fastest': { en: 'Fastest', bn: 'দ্রুততম' },
+  'shipping.free': { en: 'Free', bn: 'ফ্রি' },
+  'shipping.cartons': { en: 'cartons', bn: 'কার্টন' },
+  'shipping.freightNote': {
+    en: 'Over 200 kg ships by truck freight — request a freight quote for exact cost.',
+    bn: '২০০ কেজির বেশি হলে ট্রাক ফ্রেইটে যাবে — সঠিক খরচের জন্য কোট চান।',
+  },
+  'shipping.sourcedNote': {
+    en: 'Sourced-to-order items dispatch after payment confirmation, not after order placement.',
+    bn: 'অর্ডারে সোর্স করা পণ্য পেমেন্ট নিশ্চিত হওয়ার পর পাঠানো হয়, অর্ডার দেওয়ার পর নয়।',
+  },
+  // The table is populated at the MOQ rather than left blank, so the note has
+  // to say which quantity these rates belong to. Telling a buyer to 'enter a
+  // quantity' beside a table full of figures reads as a stale message.
+  'shipping.enterQtyFirst': {
+    en: 'Rates shown for the minimum order — enter your quantity for exact figures.',
+    bn: 'সর্বনিম্ন অর্ডারের হার দেখানো হচ্ছে — সঠিক হিসাবের জন্য আপনার পরিমাণ দিন।',
+  },
+
+  /* ----------------------------------------------------------------- reviews */
+  'reviews.title': { en: 'Reviews', bn: 'রিভিউ' },
+  'reviews.verifiedPurchase': { en: 'Verified purchase', bn: 'যাচাইকৃত ক্রয়' },
+  'reviews.withPhotos': { en: 'With photos', bn: 'ছবিসহ' },
+  'reviews.repeatBuyers': { en: 'Repeat buyers', bn: 'পুনঃক্রেতা' },
+  'reviews.ordered': { en: 'Ordered', bn: 'অর্ডার' },
+  'reviews.helpful': { en: 'Helpful', bn: 'উপকারী' },
+  'reviews.replied': { en: 'replied', bn: 'উত্তর দিয়েছে' },
+  'reviews.all': { en: 'All', bn: 'সব' },
+  'reviews.newest': { en: 'Newest', bn: 'নতুন' },
+  'reviews.empty': {
+    en: 'No reviews yet — be the first to review after your order.',
+    bn: 'এখনও রিভিউ নেই — অর্ডারের পর প্রথম রিভিউ আপনিই দিন।',
+  },
+  'reviews.showMore': { en: 'Show more reviews', bn: 'আরও রিভিউ' },
+  'reviews.outOf5': { en: 'out of 5', bn: '৫-এর মধ্যে' },
+  'reviews.noneMatch': { en: 'No reviews match this filter.', bn: 'এই ফিল্টারে কোনও রিভিউ নেই।' },
+
+  /* -------------------------------------------------------------------- RFQ */
+  'rfq.title': { en: 'Request a quote', bn: 'কোটেশন চান' },
+  'rfq.quantity': { en: 'Quantity', bn: 'পরিমাণ' },
+  'rfq.targetPrice': { en: 'Target price', bn: 'কাঙ্ক্ষিত মূল্য' },
+  'rfq.ladderAnchor': { en: 'Ladder price at', bn: 'ল্যাডার মূল্য' },
+  'rfq.deliverTo': { en: 'Deliver to', bn: 'ডেলিভারি' },
+  'rfq.neededBy': { en: 'Needed by', bn: 'কবে দরকার' },
+  'rfq.customisation': { en: 'Customisation', bn: 'কাস্টমাইজেশন' },
+  'rfq.logoPrint': { en: 'Logo print', bn: 'লোগো প্রিন্ট' },
+  'rfq.customPackaging': { en: 'Custom packaging', bn: 'কাস্টম প্যাকেজিং' },
+  'rfq.privateLabel': { en: 'Private label', bn: 'প্রাইভেট লেবেল' },
+  'rfq.details': { en: 'Details', bn: 'বিস্তারিত' },
+  'rfq.detailsPlaceholder': {
+    en: 'Specifications, branding, packaging, payment terms…',
+    bn: 'স্পেসিফিকেশন, ব্র্যান্ডিং, প্যাকেজিং, পেমেন্ট শর্ত…',
+  },
+  'rfq.attachments': { en: 'Attachments', bn: 'সংযুক্তি' },
+  'rfq.addFiles': { en: 'Add files', bn: 'ফাইল যোগ' },
+  'rfq.attachmentHint': { en: 'Spec sheet or artwork · up to 5 files, 10 MB each', bn: 'স্পেক শিট বা আর্টওয়ার্ক · ৫টি ফাইল, প্রতিটি ১০ এমবি' },
+  'rfq.responseTime': { en: 'Typical first response', bn: 'সাধারণত প্রথম উত্তর' },
+  'rfq.send': { en: 'Send request', bn: 'অনুরোধ পাঠান' },
+  'rfq.sending': { en: 'Sending…', bn: 'পাঠানো হচ্ছে…' },
+  'rfq.sent': { en: 'Request sent', bn: 'অনুরোধ পাঠানো হয়েছে' },
+  'rfq.sentBody': {
+    en: 'We typically reply within 4 hours. You can track this request and compare quotes as they arrive.',
+    bn: 'সাধারণত ৪ ঘণ্টার মধ্যে উত্তর দেওয়া হয়। কোট এলে তুলনা করতে পারবেন।',
+  },
+  'rfq.trackRequest': { en: 'Track this request', bn: 'অনুরোধ ট্র্যাক করুন' },
+  'rfq.failed': {
+    en: 'Could not send the request. Your draft is saved.',
+    bn: 'অনুরোধ পাঠানো যায়নি। আপনার ড্রাফট সংরক্ষিত আছে।',
+  },
+  'rfq.privacy': {
+    en: 'Your contact details are shared with the seller only.',
+    bn: 'আপনার যোগাযোগের তথ্য কেবল বিক্রেতার সঙ্গে শেয়ার হবে।',
+  },
+  'rfq.required': { en: 'required', bn: 'আবশ্যক' },
+  'rfq.close': { en: 'Close request form', bn: 'ফর্ম বন্ধ' },
+  'rfq.draftRestored': { en: 'Draft restored', bn: 'ড্রাফট ফিরে এসেছে' },
+
+  /* ------------------------------------------------------------------- rails */
+  'rail.similar': { en: 'Similar products', bn: 'একই ধরনের পণ্য' },
+  'rail.similarNote': { en: 'priced at your quantity', bn: 'আপনার পরিমাণে মূল্য' },
+  'rail.boughtTogether': { en: 'Frequently bought together', bn: 'একসঙ্গে কেনা হয়' },
+  'rail.recentlyViewed': { en: 'Recently viewed', bn: 'সম্প্রতি দেখা' },
+  'rail.addBundle': { en: 'Add all three to cart', bn: 'তিনটিই কার্টে যোগ' },
+  'rail.viewAll': { en: 'View all', bn: 'সব দেখুন' },
+  'rail.fromPrice': { en: 'from', bn: 'শুরু' },
+
+  /* ------------------------------------------------------------------ footer */
+  'footer.buying': { en: 'Buying', bn: 'ক্রয়' },
+  'footer.selling': { en: 'Selling', bn: 'বিক্রয়' },
+  'footer.support': { en: 'Support', bn: 'সহায়তা' },
+  'footer.company': { en: 'Company', bn: 'কোম্পানি' },
+  'footer.popularCategories': { en: 'Popular categories', bn: 'জনপ্রিয় ক্যাটাগরি' },
+  'footer.installApp': { en: 'Install the app', bn: 'অ্যাপ ইনস্টল করুন' },
+  'footer.installAppSub': { en: 'Works offline, order faster', bn: 'অফলাইনেও চলে, দ্রুত অর্ডার' },
+  'footer.tradeLicence': { en: 'Trade licence', bn: 'ট্রেড লাইসেন্স' },
+  'footer.rights': {
+    en: "Made for Bangladesh's retailers & resellers",
+    bn: 'বাংলাদেশের খুচরা বিক্রেতা ও রিসেলারদের জন্য',
+  },
+
+  /* ------------------------------------------------------------------ states */
+  'state.notFoundTitle': {
+    en: 'This listing is no longer available',
+    bn: 'এই লিস্টিং আর নেই',
+  },
+  'state.notFoundBody': {
+    en: 'It may have been unpublished or sold out permanently. Search for what you need, or browse similar products below.',
+    bn: 'এটি সরিয়ে নেওয়া হয়েছে বা স্থায়ীভাবে শেষ। আপনার প্রয়োজন খুঁজুন, বা নিচের একই ধরনের পণ্য দেখুন।',
+  },
+  'state.errorTitle': { en: 'Something went wrong loading this product', bn: 'পণ্য লোড করতে সমস্যা হয়েছে' },
+  'state.errorBody': {
+    en: 'The connection dropped or the catalogue is briefly unavailable. Nothing you entered was lost.',
+    bn: 'সংযোগ বিচ্ছিন্ন হয়েছে বা ক্যাটালগ সাময়িকভাবে অনুপলব্ধ। আপনার দেওয়া তথ্য হারায়নি।',
+  },
+  'state.tryAgain': { en: 'Try again', bn: 'আবার চেষ্টা করুন' },
+  'state.searchProducts': { en: 'Search products', bn: 'পণ্য খুঁজুন' },
+  'state.offline': {
+    en: 'Offline — prices may have changed',
+    bn: 'অফলাইন — মূল্য পরিবর্তিত হতে পারে',
+  },
+  'state.offlineCta': { en: 'Reconnect to order', bn: 'অর্ডারে সংযোগ দিন' },
+  'state.loading': { en: 'Loading product', bn: 'পণ্য লোড হচ্ছে' },
+
+  /* --------------------------------------------------------------- home */
+  'home.eyebrow': { en: 'Wholesale sourcing · Bangladesh', bn: 'পাইকারি সোর্সিং · বাংলাদেশ' },
+  'home.headline': {
+    en: 'Source wholesale, priced in Taka, delivered nationwide.',
+    bn: 'পাইকারি সোর্সিং — টাকায় মূল্য, সারা দেশে ডেলিভারি।',
+  },
+  'home.sub': {
+    en: 'Laddered wholesale pricing you can read before you ask, escrow-protected payment, and four couriers quoting against your district. Built for shops that reorder.',
+    bn: 'জিজ্ঞেস করার আগেই দেখা যায় এমন ল্যাডার মূল্য, এসক্রো-সুরক্ষিত পেমেন্ট এবং আপনার জেলার জন্য চারটি কুরিয়ারের দর। যারা বারবার অর্ডার করেন তাদের জন্য।',
+  },
+  'home.browseCategories': { en: 'Browse all categories', bn: 'সব ক্যাটাগরি দেখুন' },
+  'home.popular': { en: 'Popular right now', bn: 'এখন জনপ্রিয়' },
+  'home.statCategories': { en: 'categories', bn: 'ক্যাটাগরি' },
+  'home.statSubcategories': { en: 'subcategories', bn: 'সাবক্যাটাগরি' },
+  'home.statProducts': { en: 'products listed', bn: 'পণ্য তালিকাভুক্ত' },
+  'home.rfqTitle': { en: 'Cannot find it? Have it sourced.', bn: 'খুঁজে পাচ্ছেন না? সোর্স করিয়ে নিন।' },
+  'home.rfqBody': {
+    en: 'Post what you need with a target price and a quantity. Verified suppliers quote against it, and you compare the replies side by side.',
+    bn: 'কী দরকার, কাঙ্ক্ষিত দাম ও পরিমাণ জানান। যাচাইকৃত সরবরাহকারীরা কোট দেবেন, আপনি পাশাপাশি তুলনা করবেন।',
+  },
+  'home.rfqStep1': { en: 'Post your requirement', bn: 'প্রয়োজন জানান' },
+  'home.rfqStep2': { en: 'Compare supplier quotes', bn: 'কোট তুলনা করুন' },
+  'home.rfqStep3': { en: 'Accept and it becomes an order', bn: 'গ্রহণ করলেই অর্ডার' },
+  'home.shopByCategory': { en: 'Shop by category', bn: 'ক্যাটাগরি অনুযায়ী' },
+  'home.shopByCategorySub': {
+    en: 'Twenty categories, every one with its own subcategory tree.',
+    bn: 'বিশটি ক্যাটাগরি, প্রতিটিতে নিজস্ব সাবক্যাটাগরি।',
+  },
+  'home.reviewTitle': { en: 'Review the product page', bn: 'পণ্য পেজ দেখুন' },
+  'home.reviewSub': {
+    en: 'Each listing below exercises a different state the page has to handle.',
+    bn: 'নিচের প্রতিটি লিস্টিং পেজের একটি ভিন্ন অবস্থা দেখায়।',
+  },
+  'home.openPage': { en: 'Open page', bn: 'পেজ দেখুন' },
+
+  /* ----------------------------------------------------------- categories */
+  'category.all': { en: 'All categories', bn: 'সব ক্যাটাগরি' },
+  'category.directoryTitle': { en: 'All categories', bn: 'সব ক্যাটাগরি' },
+  'category.directorySub': {
+    en: 'Every category and subcategory on ArcB2B. Filter to jump straight to a branch.',
+    bn: 'ArcB2B-এর সব ক্যাটাগরি ও সাবক্যাটাগরি। সরাসরি যেতে ফিল্টার করুন।',
+  },
+  'category.filterLabel': { en: 'Filter categories', bn: 'ক্যাটাগরি ফিল্টার' },
+  'category.filterPlaceholder': { en: 'Filter by name — try "cable" or "kurti"', bn: 'নাম দিয়ে ফিল্টার — যেমন "কেবল"' },
+  'category.noMatches': { en: 'No category matches that filter.', bn: 'এই ফিল্টারে কোনও ক্যাটাগরি নেই।' },
+  'category.clearFilter': { en: 'Clear filter', bn: 'ফিল্টার মুছুন' },
+  'category.products': { en: 'products', bn: 'পণ্য' },
+  'category.subcategories': { en: 'subcategories', bn: 'সাবক্যাটাগরি' },
+  'category.browseAll': { en: 'Browse all of', bn: 'সব দেখুন —' },
+  'category.refine': { en: 'Refine by subcategory', bn: 'সাবক্যাটাগরি অনুযায়ী' },
+  'category.inThisCategory': { en: 'In this category', bn: 'এই ক্যাটাগরিতে' },
+  'category.showing': { en: 'Showing', bn: 'দেখানো হচ্ছে' },
+  'category.sampleNote': {
+    en: 'sample data covers a few branches of the tree',
+    bn: 'নমুনা ডেটা কয়েকটি শাখা জুড়ে আছে',
+  },
+  'category.emptyTitle': { en: 'No sample listings in this branch yet', bn: 'এই শাখায় এখনও নমুনা লিস্টিং নেই' },
+  'category.emptyBody': {
+    en: 'The taxonomy is complete, but this build ships sample products for only a few branches. Browse a featured category, or post a sourcing request and have it filled.',
+    bn: 'ক্যাটাগরি কাঠামো সম্পূর্ণ, তবে এই বিল্ডে কয়েকটি শাখায় নমুনা পণ্য আছে। ফিচার্ড ক্যাটাগরি দেখুন বা সোর্সিং অনুরোধ দিন।',
+  },
+
+  /* -------------------------------------------------------------------- misc */
+  'misc.info': { en: 'More information', bn: 'আরও তথ্য' },
+  'misc.close': { en: 'Close', bn: 'বন্ধ' },
+  'misc.of': { en: 'of', bn: 'এর' },
+  'misc.and': { en: 'and', bn: 'এবং' },
+} as const satisfies Record<string, Bilingual>;
+
+export type StringKey = keyof typeof STRINGS;
+
+/** Bound translator. Server components call `const t = translator(lang)`. */
+export function translator(lang: Lang): (key: StringKey) => string {
+  return (key) => pick(STRINGS[key], lang);
+}
+
+export function t(lang: Lang, key: StringKey): string {
+  return pick(STRINGS[key], lang);
+}
+
+/** Locale-prefixed href. Every internal link goes through this. */
+export function localeHref(lang: Lang, path: string): string {
+  const clean = path.startsWith('/') ? path : `/${path}`;
+  return `/${lang}${clean === '/' ? '' : clean}`;
+}
+
+export const LOCALE_LABEL: Record<Locale, string> = {
+  en: 'English',
+  bn: 'বাংলা',
+};
+
+/** `hreflang` values for the metadata alternates map. */
+export const HREFLANG: Record<Locale, string> = {
+  en: 'en-BD',
+  bn: 'bn-BD',
+};

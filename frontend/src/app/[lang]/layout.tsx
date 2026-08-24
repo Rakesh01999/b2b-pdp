@@ -4,6 +4,7 @@ import { Geist, Geist_Mono, Anek_Bangla } from 'next/font/google';
 import '../globals.css';
 
 import { AppProviders } from '@/features/app/providers';
+import { Toaster } from 'sonner';
 import { Header } from '@/features/chrome/header';
 import { Footer } from '@/features/chrome/footer';
 import { MobileTabBar } from '@/features/chrome/mobile-tab-bar';
@@ -123,6 +124,7 @@ export default async function LocaleLayout({
           <Footer lang={lang} />
           <MobileTabBar lang={lang} />
         </AppProviders>
+        <Toaster position="bottom-center" toastOptions={{ className: 'zone-decision' }} />
       </body>
     </html>
   );

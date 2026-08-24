@@ -13,6 +13,7 @@ import {
   ShoppingCart,
   Truck,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { useTrade } from '@/features/product/trade-context';
 import { usePrimaryAction } from './use-primary-action';
 import { useCart } from '@/features/app/providers';
@@ -85,10 +86,18 @@ export function PurchaseActions({ lang }: { lang: Lang }) {
       }
       await navigator.clipboard.writeText(payload.url);
       setShared(true);
+      toast.success(t(lang, 'cta.linkCopied'));
       setTimeout(() => setShared(false), 2200);
     } catch {
       // Share cancelled or clipboard denied — nothing to recover, and an error
       // toast for a cancelled share is noise.
+    }
+  }
+
+  function handleSave() {
+    toggleSaved(product.slug);
+    if (!saved) {
+      toast.success(t(lang, 'cta.saved'));
     }
   }
 
@@ -249,7 +258,7 @@ export function PurchaseActions({ lang }: { lang: Lang }) {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => toggleSaved(product.slug)}
+          onClick={handleSave}
           aria-pressed={saved}
           className={cx('flex-1 gap-1.5', saved && 'text-accent-ink')}
         >

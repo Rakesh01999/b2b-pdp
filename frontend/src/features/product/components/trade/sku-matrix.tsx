@@ -148,6 +148,7 @@ export function SkuMatrix({ lang, compact = false }: { lang: Lang; compact?: boo
                           : value > 0
                             ? 'bg-accent-soft'
                             : 'bg-surface focus-within:bg-accent-soft/60',
+                        !disabled && 'focus-within:z-10 focus-within:ring-2 focus-within:ring-inset focus-within:ring-accent'
                       )}
                     >
                       <input
@@ -180,7 +181,7 @@ export function SkuMatrix({ lang, compact = false }: { lang: Lang; compact?: boo
                           .filter(Boolean)
                           .join(', ')}
                         className={cx(
-                          'tnum w-full min-w-[68px] bg-transparent px-1 pb-4 pt-2.5 text-center text-[14px] font-semibold outline-none',
+                          'tnum w-full min-w-[68px] bg-transparent px-1 pb-4 pt-2.5 text-center text-[14px] font-semibold outline-none focus:outline-none focus-visible:outline-none',
                           disabled ? 'cursor-not-allowed text-ink-faint' : 'text-ink',
                         )}
                       />

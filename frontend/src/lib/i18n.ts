@@ -79,6 +79,7 @@ const STRINGS = {
   'product.factoryDirect': { en: 'Factory direct', bn: 'ফ্যাক্টরি ডাইরেক্ট' },
   'product.lowStock': { en: 'Low stock', bn: 'স্টক কম' },
   'product.outOfStock': { en: 'Out of stock', bn: 'স্টক শেষ' },
+  'product.shipsToday': { en: 'Ships today', bn: 'আজই পাঠানো হবে' },
 
   /* --------------------------------------------------------------- gallery */
   'gallery.zoomHint': { en: 'Hover to zoom', bn: 'জুম করতে হোভার' },

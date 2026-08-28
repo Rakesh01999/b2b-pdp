@@ -108,8 +108,14 @@ check('lowest-minimum sort is ascending on MOQ', () => {
 });
 
 check('a query with no listings still routes to matching shelves', () => {
-  const result = searchCatalogue({ q: 'cookware' });
-  assert.equal(result.total, 0, 'sample catalogue should hold no cookware');
+  // `machinery` is one of the branches the sample catalogue still does not
+  // reach — see the note at the top of `src/data/catalog.ts`. A compound query
+  // like "printing machinery" or "garment machinery" would not do here: each
+  // word is checked individually as well as as a phrase, and "printing" and
+  // "garment" both already match an unrelated listing's category name
+  // (Packaging & Printing, Apparel & Garments).
+  const result = searchCatalogue({ q: 'machinery' });
+  assert.equal(result.total, 0, 'sample catalogue should hold no machinery');
   assert.ok(result.categorySuggestions.length > 0, 'expected a shelf suggestion');
 });
 

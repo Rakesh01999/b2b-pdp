@@ -118,6 +118,16 @@ function hex(value) {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
+/** The inverse of `hex` — an RGB triple back to a `#rrggbb` string. */
+function toHex(rgb) {
+  return (
+    '#' +
+    rgb
+      .map((c) => Math.round(clamp01(c / 255) * 255).toString(16).padStart(2, '0'))
+      .join('')
+  );
+}
+
 /** Deterministic value noise — grain, so flat fills do not band. */
 function noise2(x, y, seed) {
   const n = Math.sin(x * 12.9898 + y * 78.233 + seed * 43.7581) * 43758.5453;
@@ -544,11 +554,18 @@ function drawCarton(canvas, cx, cy, size, palette) {
 
   drawShadow(canvas, cx, front[1] + height * 0.06, w * 1.15, rise * 0.8, 0.45, palette.shadow);
 
-  const kraft = '#cb9c64';
-  const kraftLight = '#e6c396';
-  const kraftMid = '#b6844c';
-  const kraftDark = '#98693a';
-  const kraftDeep = '#7d5730';
+  // Tinted toward the palette's body colour rather than a single fixed brown,
+  // so a cookware listing and a hand-tool listing do not ship the identical
+  // carton photo — the one thing every "this product has no bespoke
+  // illustration" stand-in must not do. The mix stays anchored to a kraft base
+  // so the box still reads as corrugated board, not a flat colour swatch.
+  const kraftBase = hex('#cb9c64');
+  const tint = mixRgb(kraftBase, hex(palette.body), 0.5);
+  const kraft = toHex(tint);
+  const kraftLight = toHex(mixRgb(tint, [255, 255, 255], 0.34));
+  const kraftMid = toHex(mixRgb(tint, [0, 0, 0], 0.1));
+  const kraftDark = toHex(mixRgb(tint, [0, 0, 0], 0.26));
+  const kraftDeep = toHex(mixRgb(tint, [0, 0, 0], 0.42));
 
   // Top face — catches the key light.
   fillFace(canvas, [apex, right, front, left], kraftLight, kraft);
@@ -667,6 +684,55 @@ const PALETTES = {
     bodyLight: '#7fa4ff',
     bodyDark: '#1c3f9e',
     accent: '#ffffff',
+  },
+
+  // The four below exist only to tint the carton in `drawCarton` — see the
+  // comment on the `card-*.png` job list — so their `body` is what matters;
+  // the rest of the fields just keep the background sweep consistent with
+  // everything else.
+  toolMetal: {
+    bgTop: '#f2f4f6',
+    bgBottom: '#dde2e6',
+    floor: '#ccd3d9',
+    key: '#ffffff',
+    shadow: [24, 30, 36],
+    body: '#5b6b78',
+    bodyLight: '#8b9aa6',
+    bodyDark: '#33404a',
+    accent: '#d8dee3',
+  },
+  ironRust: {
+    bgTop: '#f7f2ee',
+    bgBottom: '#ece1d8',
+    floor: '#ddccbe',
+    key: '#fff8f0',
+    shadow: [40, 28, 20],
+    body: '#b0522c',
+    bodyLight: '#d9865a',
+    bodyDark: '#7a3418',
+    accent: '#f4c9a8',
+  },
+  sportsGreen: {
+    bgTop: '#f1f6f2',
+    bgBottom: '#dde8e0',
+    floor: '#c9d9cd',
+    key: '#ffffff',
+    shadow: [20, 36, 28],
+    body: '#2f8f5b',
+    bodyLight: '#6cc491',
+    bodyDark: '#1c5c39',
+    accent: '#cdeedb',
+  },
+  jewelPlum: {
+    bgTop: '#f6f2f5',
+    bgBottom: '#e8dde5',
+    floor: '#d6c5d1',
+    key: '#fff8fc',
+    shadow: [38, 22, 34],
+    body: '#7a3364',
+    bodyLight: '#b06d9c',
+    bodyDark: '#4a1c3c',
+    accent: '#e9c9dd',
   },
 };
 
@@ -816,6 +882,33 @@ const JOBS = [
   { file: 'card-powerbank.png', size: CARD, kind: 'phoneCase', shot: 'hero', palette: 'earbudsBlack', seed: 54 },
   { file: 'card-smartwatch.png', size: CARD, kind: 'panel', shot: 'variant', palette: 'phoneCase', seed: 55 },
   { file: 'card-tripod.png', size: CARD, kind: 'phoneCase', shot: 'macro', palette: 'led', seed: 56 },
+
+  // New wholesale categories — home & kitchen, beauty, stationery, footwear,
+  // toys, hardware, auto, sports, jewellery, textiles, apparel.
+  //
+  // The `carton` shot is kind-agnostic (it always draws a generic shipping
+  // carton, ignoring `kind` entirely) — which makes it the one truly neutral
+  // stand-in this generator has. `garment`, `phoneCase` and `panel` all carry
+  // recognisable, specific silhouettes (a shirt, a phone with camera cutouts, a
+  // glowing disc), so reusing one of those for an unrelated department — a
+  // camera-dotted "phone" standing in for a skincare bottle, say — reads as a
+  // mismatched asset, not a tasteful abstraction. Only the two genuine textile
+  // items below (fabric, a kids' t-shirt) use the garment silhouette, because
+  // that shape actually is the category. Everything else gets a carton, which
+  // is also the honest choice for a site whose whole pricing model is
+  // carton-quantity anyway.
+  { file: 'card-cookware.png', size: CARD, kind: 'earbuds', shot: 'carton', palette: 'toolMetal', seed: 71 },
+  { file: 'card-skincare.png', size: CARD, kind: 'earbuds', shot: 'carton', palette: 'earbudsWhite', seed: 72 },
+  { file: 'card-notebook.png', size: CARD, kind: 'earbuds', shot: 'carton', palette: 'kurti', seed: 73 },
+  { file: 'card-backpack.png', size: CARD, kind: 'earbuds', shot: 'carton', palette: 'phoneCase', seed: 74 },
+  { file: 'card-blocks.png', size: CARD, kind: 'earbuds', shot: 'carton', palette: 'led', seed: 75 },
+  { file: 'card-toolkit.png', size: CARD, kind: 'earbuds', shot: 'carton', palette: 'earbudsBlack', seed: 76 },
+  { file: 'card-fasteners.png', size: CARD, kind: 'earbuds', shot: 'carton', palette: 'ironRust', seed: 77 },
+  { file: 'card-caraccessory.png', size: CARD, kind: 'earbuds', shot: 'carton', palette: 'earbudsBlack', seed: 78 },
+  { file: 'card-dumbbell.png', size: CARD, kind: 'earbuds', shot: 'carton', palette: 'sportsGreen', seed: 79 },
+  { file: 'card-watch.png', size: CARD, kind: 'earbuds', shot: 'carton', palette: 'jewelPlum', seed: 80 },
+  { file: 'card-fabric.png', size: CARD, kind: 'garment', shot: 'hero', palette: 'kurti', seed: 81 },
+  { file: 'card-kidstshirt.png', size: CARD, kind: 'garment', shot: 'hero', palette: 'earbudsWhite', seed: 82 },
 
   // Buyer-submitted review photos
   { file: 'review-01.png', size: REVIEW, kind: 'earbuds', shot: 'three-quarter', palette: 'earbudsBlack', seed: 61 },

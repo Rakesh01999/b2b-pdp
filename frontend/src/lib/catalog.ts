@@ -2,6 +2,7 @@ import {
   ALL_CARDS,
   ARCB2B_SOURCING,
   BOUGHT_TOGETHER,
+  DHAKA_PACK_HOUSE,
   MEGHNA_TEXTILES,
   PRODUCTS,
   RIDDHI_IMPORTS,
@@ -134,7 +135,7 @@ export const TRENDING_TERMS = [
 
 /* ------------------------------------------------------------------- sellers */
 
-const SELLERS: Seller[] = [ARCB2B_SOURCING, MEGHNA_TEXTILES, RIDDHI_IMPORTS];
+const SELLERS: Seller[] = [ARCB2B_SOURCING, MEGHNA_TEXTILES, RIDDHI_IMPORTS, DHAKA_PACK_HOUSE];
 
 /** Storefront slug is the tail of `storeHref`, so the two can never disagree. */
 function storeSlug(seller: Seller): string {

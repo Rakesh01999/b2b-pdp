@@ -35,13 +35,17 @@ export function ProductSummary({ product, lang }: { product: Product; lang: Lang
         {/* Local stock and sourced-to-order are decided by whether the seller
             declares a production window, not by dispatch lead time — a line that
             ships from a Dhaka warehouse in three days is in stock, and labelling
-            it "sourced to order" pushes buyers toward a quote they don't need. */}
-        {product.status === 'out_of_stock' || stock === 0 ? (
-          <Badge tone="danger">{t(lang, 'product.outOfStock')}</Badge>
-        ) : logistics.sourcingDays ? (
+            it "sourced to order" pushes buyers toward a quote they don't need.
+            That check has to run before the zero-stock check, not after: a pure
+            made-to-order listing is *supposed* to hold nothing in a warehouse,
+            and reporting "out of stock" on it contradicts the trade panel below,
+            which is already using `resolveListingState()`'s correct precedence. */}
+        {logistics.sourcingDays ? (
           <Badge tone="info" icon={<Truck size={12} aria-hidden />}>
             {t(lang, 'product.sourcedToOrder')}
           </Badge>
+        ) : product.status === 'out_of_stock' || stock === 0 ? (
+          <Badge tone="danger">{t(lang, 'product.outOfStock')}</Badge>
         ) : (
           <Badge tone="success" icon={<Truck size={12} aria-hidden />}>
             {t(lang, 'product.localStock')}

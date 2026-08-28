@@ -13,13 +13,16 @@ npm install
 npm run media     # generate the product imagery (required once, ~20s)
 npm run dev       # http://localhost:3000  → redirects to /en
 npm run build && npm start
-npm test          # 37 assertions over the pricing / mix / landed-cost maths
+npm test          # 51 assertions over the pricing / mix / landed-cost / search maths
 npm run lint && npm run typecheck
 ```
 
 Open `/en` or `/bn`. The home page carries the hero and the full category tree;
-its last section indexes the five product pages, each exercising a different
-listing state.
+its last section indexes five reference product pages, each exercising a
+different listing state. The catalogue behind everything else — search,
+category listings, deals, the paginated home rails — holds 22 products across
+15 of the 20 main categories, four sellers, and three units besides the piece
+(kilogram, metre, dozen). See the note at the top of `src/data/catalog.ts`.
 
 ---
 
@@ -258,6 +261,19 @@ by reading the code.
 11. **A category page claimed "1,842 products" and rendered one.** The header
     count is the taxonomy figure and the grid holds whatever sample data exists;
     it now says which is which rather than letting the reader reconcile them.
+12. **Five rail cards had no product behind them.** `usb-c-braided-cable-1m`,
+    `retail-blister-box-blank`, `power-bank-10000mah-slim`, `smartwatch-fit-s1`
+    and `phone-tripod-ring-light` appeared in rails, search and "frequently
+    bought together" as lightweight cards, but `getProduct()` only ever looked
+    inside the five detailed products — clicking one 404'd. All five are full
+    listings now.
+13. **The header badge could show "Out of stock" on a made-to-order line with
+    a genuinely empty warehouse** — which is not a defect on a pure
+    sourced-to-order product, it is the expected state. The check ran the
+    zero-stock branch before the sourcing-window branch; `resolveListingState()`
+    already had the precedence right, the summary badge above it did not.
+    Reordered to match, and pinned by the one listing in the sample data with
+    both conditions true (`kids-cotton-tshirt-set-assorted`).
 
 ---
 

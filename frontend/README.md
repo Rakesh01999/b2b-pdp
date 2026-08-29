@@ -1,87 +1,126 @@
-# ArcB2B — Product Detail Page
+# ArcB2B — Trade Desk
 
-An implementation of the **Trade Desk** product page from
+A standalone implementation of the **Trade Desk** product page and the
+storefront around it, from
 [`../docs/arcb2b-pdp-design-plan.md`](../docs/arcb2b-pdp-design-plan.md).
 
-Standalone app, deliberately separate from `../ARCB2B` — that repository is
-reference only and nothing in it was modified. This build pins the same versions
-it uses (`next@16.3.2`, `react@19.2.4`, Tailwind 4, `lucide-react`) so the
-components are drop-in compatible with that frontend.
+Deliberately separate from `../ARCB2B` — that repository is reference only and
+nothing in it was modified. This build pins the same major versions
+(`next@16.3.2`, `react@19.2.4`, Tailwind 4, `lucide-react`) so the components
+stay drop-in compatible with that frontend, but it is its own app: its own
+palette, its own catalogue, its own routes.
 
 ```bash
 npm install
 npm run media     # generate the product imagery (required once, ~20s)
-npm run dev       # http://localhost:3000  → redirects to /en
+npm run dev       # http://localhost:3000  → redirects to /en or /bn
 npm run build && npm start
 npm test          # 51 assertions over the pricing / mix / landed-cost / search maths
 npm run lint && npm run typecheck
 ```
 
-Open `/en` or `/bn`. The home page carries the hero and the full category tree;
-its last section indexes five reference product pages, each exercising a
-different listing state. The catalogue behind everything else — search,
-category listings, deals, the paginated home rails — holds 22 products across
-15 of the 20 main categories, four sellers, and three units besides the piece
-(kilogram, metre, dozen). See the note at the top of `src/data/catalog.ts`.
+Open `/en` or `/bn`. `src/proxy.ts` sends an unprefixed request to whichever
+locale the browser's `Accept-Language` asks for — a real redirect, not a
+rewrite, so the URL in the address bar is always the canonical localised one.
+
+---
+
+## Table of contents
+
+1. [Surfaces](#surfaces) — every route, what it does, static or dynamic
+2. [The product page](#the-product-page) — the actual deliverable
+3. [The catalogue](#the-catalogue) — 22 products, four sellers, three units
+4. [Design system](#design-system) — tokens, cards, pagination, typography
+5. [Architecture](#architecture) — routing, rendering, state, file tree
+6. [Verified](#verified) — what was actually run, not just written
+7. [Bugs found and fixed](#bugs-found-and-fixed-during-verification)
+8. [What is stubbed](#what-is-stubbed-and-where-the-seams-are)
+9. [Fields the API must add](#fields-the-api-must-add) / [Open decisions](#open-decisions)
 
 ---
 
 ## Surfaces
 
-| route | what it is |
-|---|---|
-| `/[lang]` | Hero, the twenty-category grid, the catalogue rail, and the product-page index |
-| `/[lang]/categories` | The full directory — 20 categories, 108 subcategories, live filter across both levels |
-| `/[lang]/category/[slug]` | One route serving both levels: a parent shows its children as refinements, a child shows its siblings |
-| `/[lang]/product/[slug]` | The Trade Desk — the deliverable |
-| `/[lang]/search` | Server-rendered results — text match, category facets computed pre-filter, sort and filters as links so the page works and is linkable without JavaScript |
-| `/[lang]/deals` | Ranked by the real spread between a listing's minimum-order price and its floor price — no countdown timers |
-| `/[lang]/rfq/new` | The standalone sourcing request; drafts to `localStorage` so a twelve-field form survives a lost connection |
-| `/[lang]/cart` | Real courier and landed-cost computation over the buyer's actual cart lines and district |
-| `/[lang]/store/[slug]` | A supplier storefront — the same identity block and trust-ledger component the product page uses, not a copy of it |
-| `/[lang]/account`, `/account/orders`, `/account/rfq/[id]` | Honest signed-out state backed by real `localStorage` (cart, saved, recently viewed); the RFQ thread is the multi-supplier quote comparison, ranked by landed cost at each quote's own quantity |
-| `/[lang]/messages`, `/[lang]/notifications` | Fixture threads and a fixture feed, both stated as such; the composer persists a draft per thread |
-| `/[lang]/sign-in`, `/[lang]/register` | Real client-side validation (phone shape, business name); no identity service exists behind it, and the form says so after submit rather than faking success |
-| `/[lang]/[...slug]` | One catch-all serving all seventeen informational pages (`/help*`, `/sell*`, `/legal/*`, `/about`, `/careers`, `/how-it-works`, `/install`) from `src/data/pages.ts`, plus the terminal 404 for anything else under a locale |
+| route | what it is | rendering |
+|---|---|---|
+| `/[lang]` | Hero, the paginated 20-category grid, a paginated "recently listed" rail, and the product-page index | static |
+| `/[lang]/categories` | The full directory — 20 categories, 108 subcategories, live filter across both levels | static |
+| `/[lang]/category/[slug]` | One route serving both levels: a parent shows its children as refinements, a child shows its siblings | static |
+| `/[lang]/product/[slug]` | The Trade Desk — the deliverable | static |
+| `/[lang]/search` | Text match, category facets computed *before* filtering, sort and every filter expressed as a link, so the page is linkable, shareable and works without JavaScript | dynamic (query string) |
+| `/[lang]/deals` | Ranked by the real spread between a listing's minimum-order price and its floor price — no countdown timers, no invented "was" price | static |
+| `/[lang]/rfq/new` | The standalone sourcing request; drafts to `localStorage` so a twelve-field form survives a lost connection or a back-gesture | static |
+| `/[lang]/cart` | Real courier and landed-cost computation over the buyer's actual cart lines and delivery district | static |
+| `/[lang]/store/[slug]` | A supplier storefront — the same identity block and trust-ledger component the product page uses, not a copy of it | static |
+| `/[lang]/account`, `/account/orders`, `/account/rfq/[id]` | Honest signed-out state backed by real `localStorage` (cart, saved, recently viewed); the RFQ thread is a multi-supplier quote comparison ranked by landed cost at each quote's own quantity | static |
+| `/[lang]/messages`, `/[lang]/notifications` | Fixture threads and a fixture feed, both stated as such; the composer persists a real draft per thread | messages: dynamic (resolves which thread to open) · notifications: static |
+| `/[lang]/sign-in`, `/[lang]/register` | Real client-side validation (11-digit phone shape, business name); no identity service exists behind it, and the form says so after submit rather than faking success | static |
+| `/[lang]/[...slug]` | One catch-all serving all seventeen informational pages (`/help*`, `/sell*`, `/legal/*`, `/about`, `/careers`, `/how-it-works`, `/install`) from `src/data/pages.ts`, plus the terminal 404 for anything else under a locale | static |
 
-**337 pages prerender statically**: every category and subcategory in both
-locales, the products, the directory, every storefront, every content page, and
-the RFQ thread fixture. `/search` and `/messages` render on demand because they
-key off a query string or resolve which thread to open.
+**373 pages prerender statically** — every category and subcategory in both
+locales, every product, every storefront, every content page, the directory,
+home, and the RFQ thread fixture. `/search` and `/messages` render on demand
+because they key off a query string or resolve which thread to open; nothing
+else needs to.
 
 Every internal link resolves — verified by crawling both locale homes to
-exhaustion (1,042 URLs) after each change; see `npm test` for the pricing/mix/
-landed-cost/search assertions.
+exhaustion (**1,584 URLs**) after every change. `npm test` covers the parts a
+crawl cannot: the pricing, mix, landed-cost and search arithmetic.
 
 ### The hero
 
 Search-first, because a B2B hero has to get a buyer who arrived with a part
-number into the catalogue in one action while also telling a first-time importer
-what the platform does. Left column: value proposition, the search field scoped
-across the whole taxonomy, popular terms, and the three assurances. Right column
-answers the case search cannot serve — "it is not listed" — with the sourcing
-request, three numbered steps and three figures computed from the taxonomy.
+number into the catalogue in one action while also telling a first-time
+importer what the platform does. The search field itself lives once — pinned
+in the header, visible before the hero even renders — so the hero does not
+repeat it. Instead: the value proposition, a "popular right now" jump-row of
+real search terms, and the three assurances on the left; the answer to "it is
+not listed" — the sourcing request — on the right, with three numbered steps
+and three figures computed from the taxonomy.
 
 **No carousel.** A rotating banner is a decision the buyer did not ask to make,
-it moves what they were reading, and on a metered connection it is several images
-downloaded to show one. Server-rendered apart from the search field itself.
+it moves what they were reading, and on a metered connection it is several
+images downloaded to show one. Server-rendered apart from the two client
+islands below it (the paginated category grid, the paginated listings rail).
 
 ### Category browsing
 
-`data/categories.ts` is the single spine. The header's All Categories panel, the
-directory, every category page and the home grid all read it, so a category
-cannot exist in the menu and be missing from the directory, and a subcategory
-link can never 404. Main-category counts are summed from their children rather
-than stored twice.
+`data/categories.ts` is the single spine. The header's All Categories panel,
+the directory, every category page and the home grid all read it, so a
+category cannot exist in the menu and be missing from the directory, and a
+subcategory link can never 404. Main-category counts are summed from their
+children rather than stored twice.
 
 The All Categories panel is a two-pane flyout from `lg` (rail selects, pane
 shows children) and a full-height sheet below it, because a hover-driven flyout
 means nothing on a touch screen. Every entry is a real link, so browse survives
 JavaScript failing to load.
 
+### Search
+
+`src/lib/search.ts` is a pure function over the card index — no client fetch,
+no server round-trip per keystroke. It scores a whole-phrase title match above
+a scattered word match (so "power bank" does not rank a bank-transfer footnote
+above an actual power bank), computes category facet counts from the
+*unfiltered* match set (so applying a filter never hides the other routes out
+of it), and — when a query genuinely matches nothing — falls back to taxonomy
+branches whose name matches instead of an empty page with no way forward.
+
+### Pagination
+
+Two home-page sections — "Shop by category" and "Recently listed" — paginate
+eight items at a time through a shared `<Pagination>` primitive
+(`components/ui/pagination.tsx`) rather than dumping the whole taxonomy or
+catalogue onto the page at once. Client-side on purpose: the whole taxonomy is
+a few kilobytes already on the page, so slicing an array in the browser costs
+nothing a round trip to the server would cost more of, and the home route
+stays fully static (confirmed in the build output — `/en` and `/bn` still
+prerender, they do not fall back to server rendering just because a section on
+them is interactive).
+
 ---
 
-## What the product page does
+## The product page
 
 | | |
 |---|---|
@@ -90,57 +129,87 @@ JavaScript failing to load.
 | **Landed cost** | Goods + variant surcharge + courier by district + payment-gateway fee → **per-unit landed**. Baymard finds 81% of sites omit per-unit price on multi-quantity products and 67% omit total order cost; for a reseller those two omissions *are* the decision. |
 | **State-driven CTA** | The primary action is resolved from stock, production window, whether a ladder is published, requested customisation, and how far past the top tier the quantity has gone — seven states, one resolver, shared by the panel and the sticky bar. |
 | **Trust ledger** | Four measured seller metrics, each with a definition popover and an explicit *"Not enough orders yet"* below its sample threshold. Nothing is derived from anything but transaction records. |
-| **Sold-by / sourced-from** | One component, two data modes: ArcB2B-as-seller with factory provenance (the contracted P0 model) or a marketplace supplier storefront (P1). |
+| **Sold-by / sourced-from** | One component, two data modes: ArcB2B-as-seller with factory provenance (the contracted P0 model) or a marketplace supplier storefront (P1) — reused verbatim on the standalone storefront page. |
 | **Quote drawer** | Right-hand drawer on desktop, bottom sheet on mobile, prefilled from page state, draft persisted, lazy-loaded so it is not in the initial bundle. |
 | **Reviews** | Reviewer is a *business*; order quantity is shown; repeat-buyer share is promoted into the summary; photos browse across all reviews in one overlay; seller replies are prominent. |
 
 There is deliberately **no "Buy Now"** — reasoning in §12 of the plan.
 
+### Product cards
+
+Every card in every grid — search, category, deals, home, the recommendation
+rails — is the same component (`features/product/components/product-card.tsx`),
+and every card in a given grid comes out the same height, on purpose. Each
+content row below the image reserves its own space whether or not that
+listing has something to put there: the title reserves two lines even for a
+one-line title, the price row has a fixed minimum height whether it is a real
+price or "Price on request", and the dispatch line is *always* rendered —
+including the same-day case, which used to render nothing at all and quietly
+made same-day listings the shortest cards on the page (fixed as "Ships
+today"). Exactly one supply badge shows, always: local stock or sourced to
+order, never neither.
+
+Hover lifts the card (`-translate-y-1`), deepens the shadow, brightens the
+border to the accent colour, zooms the image slightly, and washes a dark
+gradient across the top of the photo so the badge stays legible over a bright
+product shot.
+
 ---
 
-## Architecture
+## The catalogue
 
-**Bilingual by routing, not by client state.** Every page lives under
-`app/[lang]/`, both locales are prerendered, `<html lang>` is correct per page,
-`hreflang` alternates are emitted, and the product page ships **no i18n
-JavaScript**. Switching language is a navigation. `src/proxy.ts` sends an
-unprefixed request to the locale its `Accept-Language` asks for.
+22 products across 15 of the 20 main categories, four sellers, and — for the
+first time in this sample data — three units besides the piece.
 
-**Server-first.** Only these ship JS: the gallery, trade panel, shipping
-comparison, review filters, section nav, sticky bar, chrome controls and the two
-quantity-aware rails. Specifications, description, seller block, breadcrumb and
-all structured data are Server Components. Four lazy chunks (quote drawer,
-lightbox, review overlay, mix sheet) load on intent.
+- **Five** are the original reference set, chosen to exercise every listing
+  state the CTA resolver can produce (`tws-earbuds-pro-x` in stock,
+  `kurti-cotton-block-print` sourced to order and marketplace-sold,
+  `led-panel-light-18w` quote-only, `phone-case-tpu-clear` with no reviews
+  yet, `bt-speaker-mini-x2` out of stock).
+- **Five** were originally lightweight rail cards with no product behind them
+  at all — clicking one 404'd, because `getProduct()` only ever looked inside
+  the five detailed products. All five are full listings now.
+- **Twelve** are new, spread across categories the sample data never reached
+  before: home & kitchen, beauty, stationery, footwear & bags, toys, hardware,
+  auto parts, sports, jewellery & watches, and textiles.
 
-**One source of truth for the working order.** `features/product/trade-context.tsx`
-derives every figure — applicable price, active tier, legality, courier band,
-landed total — in a single `useMemo`. No effects syncing state to state, so there
-is no frame where the quantity and the price disagree.
+Three of the twelve sell by a unit other than `pc` — fasteners by the
+**kilogram**, fabric by the **metre**, kids' wear by the **dozen** — exercising
+a code path the ladder, the matrix and the landed-cost maths had never
+actually been fed. Every other product in the sample data sold by the piece
+until this batch.
 
-**Money is integer paisa** everywhere (`৳1` = `100`). Percentage fees are basis
-points. The subtotal a buyer reads is the subtotal the order would be written
-with; `npm test` pins the arithmetic to the paisa.
+A fourth seller, **Dhaka Pack House** (a local Gazipur packaging and print
+supplier), joins the original three — ArcB2B Sourcing (the platform, P0),
+Meghna Textiles (a verified marketplace supplier, P1) and Riddhi Imports (an
+unverified storefront under review, driving the suspended-seller state).
 
-```
-src/
-├── app/[lang]/product/[slug]/   page · loading · error · not-found · opengraph-image
-├── app/{sitemap,robots,manifest}.ts
-├── components/{ui,layout,seo}/
-├── features/
-│   ├── app/providers.tsx        prefs + cart + saved + recently-viewed
-│   ├── chrome/                  header · footer · tab bar · controls
-│   └── product/
-│       ├── lib/                 pricing · mix · landed-cost   ← pure, tested
-│       ├── trade-context.tsx    derived state for the whole page
-│       └── components/          gallery · summary · trade/ · sections · rails
-├── data/catalog.ts              stands in for the storefront API
-└── lib/                         types · i18n · format · constants · catalog
-```
+See the note at the top of `src/data/catalog.ts` for the full breakdown, and
+`BOUGHT_TOGETHER` for the (fixture, explicitly stated as such) co-purchase set.
 
-### Design tokens
+### Product imagery
+
+`scripts/generate-media.mjs` — a hand-written PNG encoder over
+`zlib.deflateSync`, signed-distance-field rasterisation and an isometric quad
+projection for the carton shots — generates every product photo procedurally
+rather than sourcing stock photography. A handful of illustration archetypes
+(an earbuds case, a garment silhouette, a lit panel, a phone-shaped device, a
+generic shipping carton) are reused across products via different palettes and
+seeds, which is honest for a sample catalogue as long as the reuse stays
+plausible: a phone-shaped stand-in for another mobile accessory reads as "the
+same aisle", but the same shape for a skincare serum reads as a mismatched
+asset. The **carton shot is kind-agnostic** — it always draws a generic box
+regardless of which archetype was requested — which is what makes it the safe
+default for anything outside the four literal shapes; its tone is tinted from
+the product's palette rather than a single fixed kraft-brown, so ten unrelated
+"boxed" products do not all ship the identical photo.
+
+---
+
+## Design system
 
 `app/globals.css`. Light-first, `[data-theme="dark"]` override, mapped into
-Tailwind through `@theme inline` so utilities read the live variable.
+Tailwind through `@theme inline` so utilities read the live custom property.
 
 **The brand hue is a deep trade teal, deliberately not the reference build's
 orange.** It reads professional rather than promotional, it is unmistakable
@@ -170,51 +239,140 @@ region carries exactly one of `.zone-evidence` / `.zone-decision` /
 `--header-h` and `--mobile-chrome-h` are published so every sticky offset and
 `scroll-margin-top` derives from one number instead of a magic constant.
 
+### Full-width on large screens
+
+A `3xl` breakpoint (`120rem` / 1920px) and a `.shell` utility replace the old
+fixed `max-w-[1320px]` container across the app. Grids widen a further step or
+two past `2xl` where there is real room for it (the home category tiles, the
+search and category listing grids, the directory), and the product hero adds a
+genuine third column at `2xl` — media, summary and the trade panel side by
+side — rather than stretching a two-column layout until the mix grid and the
+landed-cost rows are uncomfortably wide with nothing else using the space.
+
 ### Bengali typography
 
 A single font stack (`Geist → Anek Bangla`) consulted per codepoint, so Anek
 Bangla is reached for the Bengali block — including `৳` — while Latin runs and
-brand names stay in Geist. `[lang="bn"]` corrects the metrics: Bangla sets matras
-above and below the baseline, so it needs more leading and zero negative
-tracking. Numerals stay Western in both languages, because Bangladeshi commerce
-writes prices that way and a reseller scans them faster.
+brand names stay in Geist. `[lang="bn"]` corrects the metrics: Bangla sets
+matras above and below the baseline, so it needs more leading and zero
+negative tracking. Numerals stay Western in both languages, because
+Bangladeshi commerce writes prices that way and a reseller scans them faster.
+
+---
+
+## Architecture
+
+**Bilingual by routing, not by client state.** Every page lives under
+`app/[lang]/`, both locales are prerendered, `<html lang>` is correct per page,
+`hreflang` alternates are emitted, and the product page ships **no i18n
+JavaScript**. Switching language is a navigation.
+
+**Server-first.** Only these ship JS: the gallery, trade panel, shipping
+comparison, review filters, section nav, sticky bar, chrome controls, the two
+quantity-aware rails, the two paginated home sections, the category directory
+filter, the cart view, the RFQ form, the auth form and the message composer.
+Specifications, description, seller block, breadcrumb and all structured data
+are Server Components. Four lazy chunks (quote drawer, lightbox, review
+overlay, mix sheet) load on intent.
+
+**One source of truth for the working order.** `features/product/trade-context.tsx`
+derives every figure — applicable price, active tier, legality, courier band,
+landed total — in a single `useMemo`. No effects syncing state to state, so
+there is no frame where the quantity and the price disagree.
+
+**Money is integer paisa** everywhere (`৳1` = `100`). Percentage fees are basis
+points. The subtotal a buyer reads is the subtotal the order would be written
+with; `npm test` pins the arithmetic to the paisa.
+
+```
+src/
+├── app/
+│   ├── [lang]/
+│   │   ├── layout.tsx, page.tsx, not-found.tsx
+│   │   ├── product/[slug]/        page · loading · error · not-found · opengraph-image
+│   │   ├── category/[slug]/, categories/
+│   │   ├── search/, deals/, cart/, rfq/new/
+│   │   ├── store/[slug]/
+│   │   ├── account/, account/orders/, account/rfq/[id]/
+│   │   ├── messages/, notifications/, sign-in/, register/
+│   │   └── [...slug]/             catch-all: 17 content topics + terminal 404
+│   └── {sitemap,robots,manifest}.ts
+├── components/
+│   ├── ui/                        primitives · pagination · cx
+│   ├── layout/                    breadcrumb · page-header · back-to-results
+│   └── seo/structured-data.tsx
+├── features/
+│   ├── app/providers.tsx          prefs + cart + saved + recently-viewed
+│   ├── chrome/                    header · footer · tab bar · mega-menu · controls
+│   ├── home/                      hero · paginated category grid · paginated listings
+│   ├── categories/                directory · mega-menu · icon map
+│   ├── cart/, rfq/, account/      cart view · RFQ form · auth form · message composer
+│   └── product/
+│       ├── lib/                   pricing · mix · landed-cost   ← pure, tested
+│       ├── trade-context.tsx      derived state for the whole page
+│       └── components/            gallery · summary · product-card · trade/ · sections · rails
+├── data/                          catalog · categories · pages (content registry) · account (fixtures)
+└── lib/                           types · i18n · format · constants · catalog · search · paginate
+```
 
 ---
 
 ## Verified
 
-- `npm run build` — **275 pages prerendered static** (20 categories + 108
-  subcategories + 5 products + directory + home, × 2 locales).
-- `npm test` — 37 assertions green.
+- `npm run build` — **373 pages prerendered static** (20 categories + 108
+  subcategories + 22 products + 4 storefronts + 17 content topics + the
+  directory, home and RFQ-thread fixture, × 2 locales).
+- `npm test` — **51 assertions green** (37 over pricing/mix/landed-cost, 14
+  over catalogue search).
 - `npm run lint`, `npm run typecheck` — clean.
-- Rendered and screenshotted in headless Chrome at **500 / 768 / 1024 / 1280 /
-  1440 px**, in both locales, in light and dark theme, across the home page, the
-  category directory, a subcategory page, and the in-stock, sourced-to-order and
-  quote-only product states.
-- Server-rendered HTML confirmed to contain the `<h1>`, all four ladder prices,
-  the mix grid inputs with their `aria-label`s, both JSON-LD blocks, and a
-  `<link rel="preload" as="image">` with a full `srcset` for the LCP hero.
+- Every internal link crawled to exhaustion from both locale homes —
+  **1,584 URLs, all 200** — re-run after every change in this session,
+  including after the catalogue expansion (which fixed five previously-404ing
+  product pages) and after the card and pagination redesigns.
+- Rendered and screenshotted in headless Chrome from 420px to 2560px — mobile,
+  tablet, laptop, and the `3xl` full-width breakpoint — in both locales, in
+  light and dark theme, across the home page, the category directory, search
+  results (with and without matches), the deals page, the cart, the RFQ
+  quote-comparison thread, and the in-stock, sourced-to-order, quote-only and
+  out-of-stock product states.
+- The card hover state and the pagination click-through were verified by
+  driving headless Chrome directly over the DevTools protocol (a real
+  simulated mouse move and real button clicks), not just by reading the CSS —
+  confirmed the hover treatment actually applies and that clicking a page
+  number genuinely swaps the grid's content and updates the "Showing X–Y of Z"
+  count in both directions.
+- Server-rendered HTML confirmed to contain the `<h1>`, all four ladder
+  prices, the mix grid inputs with their `aria-label`s, both JSON-LD blocks,
+  and a `<link rel="preload" as="image">` with a full `srcset` for the LCP
+  hero.
 
-### Bugs found and fixed during verification
+---
 
-Each of these was caught by looking at the running page or by an assertion, not
-by reading the code.
+## Bugs found and fixed during verification
+
+Each of these was caught by looking at the running page or by an assertion,
+not by reading the code.
 
 **Layout and palette**
 
 - **The header wrapped into two rows at tablet widths**, dropping the account
-  icons onto their own line with a band of dead space beside them. The cause was
-  a flex line breaking on min-content that nothing in the markup declared, so it
-  was invisible from the source. Replaced with explicit grid placement — two
-  columns below `md`, three from `md` up, each child placed by name.
-- **The search field showed four characters at 768px.** The 152px scope selector
-  was competing for a shared row. It now stands down exactly where space is
-  tight: shown at `sm` (own full-width row), hidden at `md`, shown again from
-  `lg`.
-- **The submit button left a 4px sliver of border showing** and an uneven inner
-  radius — a rounded pill inside a rounded pill. The form now sets one height
-  with `items-stretch` and clips a flush button, so alignment is structural
-  rather than hand-tuned padding kept in sync by hand.
+  icons onto their own line with a band of dead space beside them. The cause
+  was a flex line breaking on min-content that nothing in the markup declared,
+  so it was invisible from the source. Replaced with explicit grid placement —
+  two columns below `md`, three from `md` up, each child placed by name.
+- **The search field showed four characters at 768px.** The 152px scope
+  selector was competing for a shared row. It now stands down exactly where
+  space is tight: shown at `sm` (own full-width row), hidden at `md`, shown
+  again from `lg`.
+- **The hero repeated the header's search field.** The pinned header bar
+  already puts the search input on screen before the hero even renders, so a
+  second, identical box beneath the headline was one control drawn twice, not
+  a second way in. Replaced with a "popular right now" jump-row of real search
+  terms — a genuinely different affordance instead of a duplicate.
+- **The submit button left a 4px sliver of border showing** and an uneven
+  inner radius — a rounded pill inside a rounded pill. The form now sets one
+  height with `items-stretch` and clips a flush button, so alignment is
+  structural rather than hand-tuned padding kept in sync by hand.
 - **The dark theme would have shipped white-on-bright-teal buttons at 2.3:1.**
   Fixed by the `--on-fill` token rather than by per-component overrides.
 - **Rating stars rendered brown** — the AA-darkened `--warning` reused for a
@@ -226,54 +384,72 @@ by reading the code.
 **Correctness**
 
 1. **Dispatch lead time was being read as sourcing.** `leadTimeDays: 3` means
-   "ships from Dhaka stock in three days", but the resolver treated any non-zero
-   value as made-to-order — labelling every stocked product "Sourced to order"
-   and offering *Start sourcing order* instead of *Add mix to cart*. Sourcing is
-   now driven by a declared production window or by demand exceeding dispatchable
-   stock. Pinned by a test.
+   "ships from Dhaka stock in three days", but the resolver treated any
+   non-zero value as made-to-order — labelling every stocked product "Sourced
+   to order" and offering *Start sourcing order* instead of *Add mix to cart*.
+   Sourcing is now driven by a declared production window or by demand
+   exceeding dispatchable stock. Pinned by a test.
 2. **The headline price misstated the MOQ price.** It showed the ladder's
-   cheapest tier (`৳440`) beside "From 50 pcs", implying ৳440 buys 50 pieces when
-   50 pieces cost ৳500 each. Now labelled *As low as*, with the MOQ price stated
-   beneath it.
-3. **Paste treated a data row as a header.** The header heuristic counted the row
-   label, so `Black⇥40⇥32` looked like a header and the first row of quantities
-   was silently dropped. Caught by `npm test`.
+   cheapest tier (`৳440`) beside "From 50 pcs", implying ৳440 buys 50 pieces
+   when 50 pieces cost ৳500 each. Now labelled *As low as*, with the MOQ price
+   stated beneath it.
+3. **Paste treated a data row as a header.** The header heuristic counted the
+   row label, so `Black⇥40⇥32` looked like a header and the first row of
+   quantities was silently dropped. Caught by `npm test`.
 4. **The mobile trade bar parked on top of the tab bar** when hidden — a plain
    `translate-y-full` moves an element down by its own height, which left it
    exactly over the 56px bar below. Both bars now move as one unit.
 5. **`useSearchParams` without a Suspense boundary** collapsed the entire hero
-   subtree to client-only rendering during the production prerender — the exact
-   LCP regression this page exists to avoid. It failed *silently*: the build
-   reported success and the defect was only visible as a
+   subtree to client-only rendering during the production prerender — the
+   exact LCP regression this page exists to avoid. It failed *silently*: the
+   build reported success and the defect was only visible as a
    `BAILOUT_TO_CLIENT_SIDE_RENDERING` marker in the emitted HTML.
-6. **Cells showed combined capacity as "available".** A cell with 12 in Dhaka and
-   240 inbound read as `252`, true of the order and false of the warehouse. Now
-   `12 +240`, and `180 sourced` where nothing is dispatchable.
-7. **An unexplained "Variant surcharge" line.** Now names its basis (`265 × +৳40`).
-8. **Landed cost appeared on quote-only lines**, promising a figure that cannot
-   exist before the seller replies.
-9. **A disabled CTA with no stated reason** at zero quantity, against this page's
-   own rule that a disabled control always says why.
+6. **Cells showed combined capacity as "available".** A cell with 12 in Dhaka
+   and 240 inbound read as `252`, true of the order and false of the
+   warehouse. Now `12 +240`, and `180 sourced` where nothing is dispatchable.
+7. **An unexplained "Variant surcharge" line.** Now names its basis
+   (`265 × +৳40`).
+8. **Landed cost appeared on quote-only lines**, promising a figure that
+   cannot exist before the seller replies.
+9. **A disabled CTA with no stated reason** at zero quantity, against this
+   page's own rule that a disabled control always says why.
 10. **The product card repeated the sourcing bug**, because it only knew
     `leadTimeDays`. It now reads a `madeToOrder` flag derived from the same
-    production-window field the resolver uses, so the card and the page cannot
-    disagree about whether a line is stocked.
+    production-window field the resolver uses, so the card and the page
+    cannot disagree about whether a line is stocked.
 11. **A category page claimed "1,842 products" and rendered one.** The header
-    count is the taxonomy figure and the grid holds whatever sample data exists;
-    it now says which is which rather than letting the reader reconcile them.
+    count is the taxonomy figure and the grid holds whatever sample data
+    exists; it now says which is which rather than letting the reader
+    reconcile them.
 12. **Five rail cards had no product behind them.** `usb-c-braided-cable-1m`,
-    `retail-blister-box-blank`, `power-bank-10000mah-slim`, `smartwatch-fit-s1`
-    and `phone-tripod-ring-light` appeared in rails, search and "frequently
-    bought together" as lightweight cards, but `getProduct()` only ever looked
-    inside the five detailed products — clicking one 404'd. All five are full
-    listings now.
+    `retail-blister-box-blank`, `power-bank-10000mah-slim`,
+    `smartwatch-fit-s1` and `phone-tripod-ring-light` appeared in rails,
+    search and "frequently bought together" as lightweight cards, but
+    `getProduct()` only ever looked inside the five detailed products —
+    clicking one 404'd. All five are full listings now.
 13. **The header badge could show "Out of stock" on a made-to-order line with
     a genuinely empty warehouse** — which is not a defect on a pure
     sourced-to-order product, it is the expected state. The check ran the
-    zero-stock branch before the sourcing-window branch; `resolveListingState()`
-    already had the precedence right, the summary badge above it did not.
-    Reordered to match, and pinned by the one listing in the sample data with
-    both conditions true (`kids-cotton-tshirt-set-assorted`).
+    zero-stock branch before the sourcing-window branch;
+    `resolveListingState()` already had the precedence right, the summary
+    badge above it did not. Reordered to match, and pinned by the one listing
+    in the sample data with both conditions true
+    (`kids-cotton-tshirt-set-assorted`).
+14. **Card height tracked how much data happened to be filled in.** A card
+    for a same-day-dispatch listing rendered shorter than its neighbours
+    because the dispatch row was omitted entirely for `leadTimeDays === 0`,
+    and the meta row's height depended on whether a rating, an order count,
+    or neither was present. Every row below the image now reserves a fixed
+    height regardless of content, and the zero-lead-time case renders "Ships
+    today" instead of nothing.
+15. **The first attempt at new product photography reused shapes that
+    actively looked like a different product** — a phone silhouette with
+    visible camera-lens dots standing in for a skincare serum, a
+    polka-dot dress shape standing in for a backpack. Caught by looking at
+    the rendered PNGs, not by reading the generator's config. Reworked to use
+    only the generator's kind-agnostic carton shot for anything outside the
+    literal earbuds/garment/phone/panel archetypes, tinted per palette so
+    reused stand-ins stay visually distinct from each other.
 
 ---
 
@@ -284,33 +460,37 @@ Nothing here pretends to be backed by a service it is not.
 | Stub | Where | Real implementation |
 |---|---|---|
 | Catalogue | `src/data/catalog.ts` behind `src/lib/catalog.ts` | `GET /v1/storefront/products/:slug`. Swap the one access module; every consumer is already behind it. |
-| Cart / RFQ submit | `features/app/providers.tsx`, `rfq-drawer.tsx` | Server Actions → `POST /v1/cart/lines`, `POST /v1/rfq`. The artificial delays exist so the optimistic pending states are observable. |
+| Search | `src/lib/search.ts` | `GET /v1/search`. Ranking, category facets and sorting are real logic over the sample index — swapping the backend is replacing `searchCatalogue()`'s body with a fetch. |
+| Cart / RFQ submit | `features/app/providers.tsx`, `rfq-drawer.tsx`, `features/rfq/rfq-page-form.tsx` | Server Actions → `POST /v1/cart/lines`, `POST /v1/rfq`. The artificial delays exist so the optimistic pending states are observable. |
+| Checkout | `features/cart/cart-view.tsx` | Payment gateway + order service. The button is disabled with a note explaining why, rather than a live-looking control that silently does nothing. |
+| Sign-in / register | `features/account/auth-form.tsx` | Identity service + SMS gateway for the OTP. Validation (phone shape, business name) runs for real client-side; submission ends in an honest "no service behind this yet" state instead of a fabricated success. |
+| RFQ quote threads | `src/data/account.ts` | The quotation service. One fixture thread (`RFQ-24817`) with three suppliers, built to exercise the actual design problem: ranking quotes that each carry a different quantity, lead time and validity by landed cost per unit rather than headline price. |
+| Messages / notifications | `src/data/account.ts` | The messaging service and the push/SMS notification pipeline. Two fixture threads and a five-entry feed; the composer persists a real per-thread draft to `localStorage` and says the send is stubbed only after an attempt. |
+| Order history | `/account/orders` | The order service. Deliberately empty rather than fabricated — an invented order a buyer believes is in flight is worse than no history at all. |
 | Courier rates | `src/lib/constants.ts` rate card | Pathao / Steadfast / RedX / eCourier APIs. Consumers read one `ShippingQuote` shape, so live rates are a data change with no UI change. |
-| Seller metrics | `catalog.ts` fixtures | A nightly-computed `SellerMetrics` aggregate. The `null` + threshold path is already implemented and used. |
+| Seller metrics | `catalog.ts` fixtures | A nightly-computed `SellerMetrics` aggregate. The `null` + threshold path is already implemented and used — four sellers, one of them (Riddhi Imports) deliberately under review with every metric unpublished. |
 | Bought-together | `BOUGHT_TOGETHER` map | Order co-occurrence. Hard-coded rather than pretending to be a model. |
 | Product video | one media item | The media kind, poster-first loading and lightbox slot are implemented; the encoded file is not bundled, and the overlay says so instead of showing a dead player. |
 | OG image Bengali | `opengraph-image.tsx` | English title in both locales — rendering Bengali needs a subsetted Bengali face bundled into the image response. Noted in the file. |
 | Product imagery | `scripts/generate-media.mjs` | Procedural PNGs (a PNG encoder over zlib plus SDF rasterisation) rather than stock photos, so the zoom lens has a genuinely higher-resolution source and `next/image` is exercised against real files. |
 | Category counts | `src/data/categories.ts` | A catalogue aggregate. Main-category totals are summed from their children rather than stored, so the two figures cannot disagree; only the leaf numbers are fixtures. |
-| Category listings | `getCategoryProducts()` | A filtered catalogue query. Sample products exist for a few branches only, and pages say so instead of padding the grid with unrelated items. |
-| Checkout | `features/cart/cart-view.tsx` | Payment gateway + order service. The button is disabled with a note explaining why, rather than a live-looking control that silently does nothing. |
-| Sign-in / register | `features/account/auth-form.tsx` | Identity service + SMS gateway for the OTP. Validation (phone shape, business name) runs for real client-side; submission ends in an honest "no service behind this yet" state instead of a fabricated success. |
-| RFQ quote threads | `src/data/account.ts` | The quotation service. One fixture thread (`RFQ-24817`) with three suppliers, built to exercise the actual design problem: ranking quotes that each carry a different quantity, lead time and validity by landed cost per unit rather than headline price. |
-| Messages / notifications | `src/data/account.ts` | The messaging service and the push/SMS notification pipeline. Two fixture threads and a five-entry feed; the composer persists a real per-thread draft to `localStorage` and says the send is stubbed only after an attempt. |
-| Search | `src/lib/search.ts` | `GET /v1/search`. Ranking, category facets and sorting are real logic over the sample index — swapping the backend is replacing `searchCatalogue()`'s body with a fetch. |
-| Order history | `/account/orders` | The order service. Deliberately empty rather than fabricated — an invented order a buyer believes is in flight is worse than no history at all. |
+| Category / search listings | `getCategoryProducts()`, `searchCatalogue()` | A filtered catalogue query. Sample products exist for 15 of 20 branches; pages say so instead of padding the grid with unrelated items, and a zero-match search routes to the taxonomy branches that do match instead of a dead end. |
 
-### Fields the API must add
+---
 
-Listed in full in §18 of the plan. The ones this page cannot be honest without:
-`rating`/`reviewCount` denormalised, `moqStep`, `weightGrams`, `cartonQty`,
-`unit`, `priceOnRequest`, `imageDerivatives`, `descriptionBlocks[]`, and a
-nullable `seller` reference. Four modules do not exist yet at all: **Review**,
-**Seller/SellerMetrics**, **RFQ**, **ShippingRate**.
+## Fields the API must add
 
-### Open decisions
+Listed in full in §18 of the plan. The ones this page cannot be honest
+without: `rating`/`reviewCount` denormalised, `moqStep`, `weightGrams`,
+`cartonQty`, `unit`, `priceOnRequest`, `imageDerivatives`,
+`descriptionBlocks[]`, and a nullable `seller` reference. Four modules do not
+exist yet at all: **Review**, **Seller/SellerMetrics**, **RFQ**,
+**ShippingRate**.
 
-Still the six from §30 of the plan. Two were settled by building:
-Next 16.3.2 was used (matching ARCB2B), and Western numerals are used in both
+## Open decisions
+
+Still the six from §30 of the plan. Two were settled by building: Next
+16.3.2 was used (matching ARCB2B), and Western numerals are used in both
 languages. The remaining four — dropping "Buy Now", the P0 seller model, the
-landed-cost rate card, and reviews-before-RFQ — are unchanged and yours to call.
+landed-cost rate card, and reviews-before-RFQ — are unchanged and yours to
+call.

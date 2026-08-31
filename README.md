@@ -5,11 +5,14 @@ before you ask, escrow-protected payment, and couriers quoted against your
 district. This repository holds the planning and the implementation of the
 **Trade Desk** product page and the storefront around it.
 
+![The Trade Desk product page — hero, quantity price ladder, SKU mix grid, landed cost, seller trust ledger, specifications, shipping, reviews and recommendation rails](docs/screenshots/product-detail-page.png)
+
 ```
 b2b-pdp/
 ├── docs/
-│   └── arcb2b-pdp-design-plan.md   research, competitive analysis, and the
-│                                   31-section plan this build implements
+│   ├── arcb2b-pdp-design-plan.md   research, competitive analysis, and the
+│   │                               31-section plan this build implements
+│   └── screenshots/                full-page captures of the running app
 └── frontend/                       the standalone Next.js app — start here
 ```
 

@@ -1,6 +1,5 @@
 # ArcB2B — Trade Desk
 
-
 Bangladesh's wholesale sourcing marketplace: laddered pricing you can read
 before you ask, escrow-protected payment, and couriers quoted against your
 district. This repository holds the planning and the implementation of the
